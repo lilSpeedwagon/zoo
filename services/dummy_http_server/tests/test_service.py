@@ -16,5 +16,4 @@ def test_ping():
 
     connection.close()
 
-
 test_ping()

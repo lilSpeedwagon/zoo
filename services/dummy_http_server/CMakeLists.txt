@@ -14,7 +14,10 @@ include_directories(${LIBS_DIR})
 # headers
 
 # sources
-set(SOURCE_EXE main.cpp)
+set(SOURCES main.cpp)
 
 # build executable
-add_executable(main ${SOURCE_EXE})
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+# link libs
+target_link_libraries(${PROJECT_NAME} lib_http)
