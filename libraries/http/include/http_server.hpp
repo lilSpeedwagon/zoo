@@ -37,6 +37,11 @@ public:
     HttpServer(std::shared_ptr<boost::asio::io_context> io_context_ptr,
                const std::string& address, const unsigned short port);
 
+    /**
+     * @brief Start listening for incoming connections
+     * 
+     * @throws std::runtime error if unable to setup server
+     */
     void Listen();
     void AddListener(const std::string& uri, const Method method,
                      const HttpHandler& handler);

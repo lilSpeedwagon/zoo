@@ -21,3 +21,4 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # link libs
 target_link_libraries(${PROJECT_NAME} lib_http)
+target_link_libraries(${PROJECT_NAME} lib_common)
