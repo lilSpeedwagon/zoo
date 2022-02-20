@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <thread>
 
@@ -25,7 +26,7 @@ struct LogMsg {
     std::string message{};
     LogLevel level{};
     std::thread::id thread_id{};
-    boost::chrono::system_clock::time_point timepoint{};
+    std::chrono::system_clock::time_point timepoint{};
     std::string module{};
 };
 
@@ -49,7 +50,7 @@ class LogHolder {
 public:
     LogHolder(LogLevel level, std::string&& module_name);
     ~LogHolder();
-    
+
     template<typename T>
     LogHolder& operator<<(const T& msg) {
         log_entry_.message += format::ToString(msg);

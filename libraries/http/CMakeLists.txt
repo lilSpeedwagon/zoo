@@ -17,7 +17,10 @@ set(HEADER_DIRS ${LIBS_DIR} ${BOOST_DIR} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
 include_directories(${HEADER_DIRS})
 
 # sources
-set(SOURCES ./src/http_server/http_server.cpp ./src/tcp_session/tcp_session.cpp)
+set(SOURCES 
+    ./src/http_server/http_server.cpp
+    ./src/tcp_session/tcp_session.cpp
+)
 
 # build static library
 add_library(${PROJECT_NAME} STATIC ${SOURCES})

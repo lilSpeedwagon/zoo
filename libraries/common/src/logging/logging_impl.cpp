@@ -12,7 +12,7 @@ LogHolder::LogHolder(LogLevel level, std::string&& module_name)
         "",                                 // message
         level,                              // level
         std::this_thread::get_id(),         // thread_id
-        boost::chrono::system_clock::now(), // timepoint
+        std::chrono::system_clock::now(),   // timepoint
         std::move(module_name),             // module
     } {}
 
@@ -20,7 +20,7 @@ LogHolder::~LogHolder() {
     try {
         LoggerFrontend::GetMainLogger().Log(std::move(log_entry_));
     } catch(const std::exception& ex) {
-        std::cerr << "~LogHolder() exception thrown: " << ex.what();
+        std::cerr << "~LogHolder() exception thrown: " << ex.what() << '\n';
     }
 }
 

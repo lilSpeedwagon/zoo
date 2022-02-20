@@ -21,6 +21,7 @@ set(SOURCES
         src/logging/logger.cpp
         src/logging/logging_impl.cpp
         src/logging/sink_stdout.cpp
+        src/format/format.cpp
 )
 
 SET(Boost_INCLUDE_DIR ${BOOST_DIR})

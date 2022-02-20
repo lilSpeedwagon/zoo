@@ -1,5 +1,7 @@
 #include "logger.hpp"
 
+#include <time.h>
+
 namespace common::logging {
 
 namespace {
@@ -18,14 +20,20 @@ std::string FormatLogLevel(const LogLevel level) {
 }
 
 std::string FormatLog(LogMsg&& msg) {
+    constexpr std::string_view kTimeFormat = "%F %T";
+
     std::stringstream ss{};
     ss << FormatLogLevel(msg.level);
-    ss << " [" << msg.timepoint << "] ";
-    ss << msg.message << '\n';
+    ss << " [" << format::TimePointToString(msg.timepoint, kTimeFormat) << "] ";
+    ss << msg.message;
     return ss.str();
 }
 
 } // namespace
+
+Logger::Logger() {
+    level_filter_ = LogLevel::Debug;
+}
 
 void Logger::Log(LogMsg&& msg) {
     std::lock_guard lock(buffer_mutex_);
@@ -45,7 +53,9 @@ void Logger::Flush() {
         std::lock_guard lock(buffer_mutex_);
         while (!buffer_.empty()) {
             auto& msg = buffer_.front();
-            ss << FormatLog(std::move(msg)) << '\n';
+            if (msg.level >= level_filter_) {
+                ss << FormatLog(std::move(msg)) << '\n';
+            }
             buffer_.pop();
         }
     }

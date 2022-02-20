@@ -1,12 +1,18 @@
 #pragma once
 
+#include <chrono>
 #include <type_traits>
 #include <string>
 #include <sstream>
 
 namespace common::format {
 
+constexpr std::string_view kDefaultTimeFormat = "%c";
 constexpr std::string_view kPlaceholder = "{}";
+
+std::string TimePointToString(
+    const std::chrono::system_clock::time_point& timepoint,
+    const std::string_view& format = kDefaultTimeFormat);
 
 inline std::string ToString(const char* value) {
     return std::string(value);
@@ -37,6 +43,12 @@ inline std::string ToString<std::exception>(const std::exception& value) {
     std::stringstream ss{};
     ss << "(" << typeid(value).name() << ") " << value.what();
     return ss.str();
+}
+
+template<>
+inline std::string ToString<std::chrono::system_clock::time_point>(
+    const std::chrono::system_clock::time_point& timepoint) {
+    return TimePointToString(timepoint);
 }
 
 template<typename ...Args>
