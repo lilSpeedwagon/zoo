@@ -8,6 +8,10 @@ namespace common::format {
 
 constexpr std::string_view kPlaceholder = "{}";
 
+inline std::string ToString(const char* value) {
+    return std::string(value);
+}
+
 template<typename T>
 std::string ToString(const T& value) {
     return std::to_string(value);

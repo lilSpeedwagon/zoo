@@ -16,35 +16,27 @@ static constexpr unsigned short kPort = 80;
 
 http::Response handle_ping(http::Request&& request) {
     http::Response response{http::Status::ok, request.version()};
-    LOG() << "/ping";
+    LOG_INFO() << "/ping";
     response.body() = "OK";
     return response;
 }
 
 http::Response handle_echo(http::Request&& request) {
     http::Response response{http::Status::ok, request.version()};
-    LOG() << "/echo";
+    LOG_INFO() << "/echo";
     response.body() = request.body();
     return response;
 }
 
-/**
- * собрал буст командой ..\..\build\bin\b2 --build-dir=build\bin --build-type=complete stage
- * из boost_root
- * теперь нужно слинковать lib_boost_log
- * в итоге нужно будет что то придумать с либами буста
- * как вариант найти/собрать контейнер с уже установленными либами. В нем гонять тесты и его деплоить
- */
-
 int main() {
-    LOG() << "setting up the server...\n";
     setlocale(LC_ALL, "Russian");
 
     constexpr size_t kThreadPoolSize = 10;
     
     try {
-        common::logging::InitLog();
+        common::logging::InitMainLogger();
 
+        LOG_INFO() << "setting up the server...";
         auto io_context_ptr = std::make_shared<boost::asio::io_context>(kThreadPoolSize);
         auto server_ptr = std::make_shared<http::server::HttpServer>(
             io_context_ptr, kAddress, kPort);

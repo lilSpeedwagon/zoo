@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(lib_http)
 set (CMAKE_CXX_STANDARD 17)
-add_compile_options(-D BOOST_DATE_TIME_NO_LIB)
+add_compile_options(-DBOOST_DATE_TIME_NO_LIB -DBOOST_CHRONO_HEADER_ONLY)
 
 # libraries headers
 set(LIBS_DIR ../../libraries)
