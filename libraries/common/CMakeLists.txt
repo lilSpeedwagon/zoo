@@ -26,6 +26,7 @@ set(SOURCES
         src/logging/logger.cpp
         src/logging/logging_impl.cpp
         src/logging/sink_stdout.cpp
+        src/logging/sink_string.cpp
         src/format/format.cpp
 )
 
@@ -40,6 +41,7 @@ add_library(${PROJECT_NAME} STATIC ${SOURCES})
 set(TEST_SOURCES
         tests/main.cpp
         tests/format.cpp
+        tests/log.cpp
         ${SOURCES}
 )
 add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})

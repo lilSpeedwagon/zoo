@@ -33,6 +33,7 @@ std::string FormatLog(LogMsg&& msg) {
 
 Logger::Logger() {
     level_filter_ = LogLevel::Debug;
+    buffer_max_size_ = 100;
 }
 
 void Logger::Log(LogMsg&& msg) {
@@ -43,11 +44,12 @@ void Logger::Log(LogMsg&& msg) {
     }
 }
 
-void Logger::AddSink(const LoggerSinkPtr sink) {
-    sinks_.push_back(sink);
-}
-
 void Logger::Flush() {
+    if (sinks_.empty()) {
+        Clear();
+        return;
+    }
+
     std::stringstream ss{};
     {
         std::lock_guard lock(buffer_mutex_);
@@ -69,6 +71,27 @@ void Logger::Clear() {
     while (!buffer_.empty()) {
         buffer_.pop();
     }
+}
+
+void Logger::SetLevelFilter(LogLevel level) {
+    level_filter_ = level;
+}
+
+void Logger::AddSink(const LoggerSinkPtr sink) {
+    sinks_.push_back(sink);
+}
+
+void Logger::ResetSinks() {
+    Flush();
+    sinks_.clear();
+}
+
+void Logger::SetBufferMaxSize(size_t size) {
+    buffer_max_size_ = size;
+}
+
+size_t Logger::GetBufferMaxSize() const {
+    return buffer_max_size_;
 }
 
 } // namespace common::logging

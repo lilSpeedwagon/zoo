@@ -14,10 +14,15 @@ public:
     Logger();
 
     void Log(LogMsg&& msg);
-    void AddSink(const LoggerSinkPtr sink);
     void SetLevelFilter(LogLevel level);
     void Flush();
     void Clear();
+
+    void AddSink(const LoggerSinkPtr sink);
+    void ResetSinks();
+
+    void SetBufferMaxSize(size_t size);
+    size_t GetBufferMaxSize() const;
 
 private:
     std::vector<LoggerSinkPtr> sinks_;

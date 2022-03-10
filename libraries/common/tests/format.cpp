@@ -10,7 +10,7 @@ void CheckString(const std::string& str, const char* expected) {
 }
 
 
-TEST_CASE("ToString", "[Format") {
+TEST_CASE("ToString", "[Format]") {
     using common::format::ToString;
 
     SECTION("Numbers") {
