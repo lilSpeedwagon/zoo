@@ -49,10 +49,10 @@ TEST_CASE_METHOD(LoggerFixture, "Log", "[Log]") {
     LOG_INFO() << "info data";
     LOG_WARNING() << "warning data";
     LOG_ERROR() << "error data";
-    CheckSink(sink_ptr, "DEBUG [time] debug data\n"
-                        "INFO [time] info data\n"
-                        "WARNING [time] warning data\n"
-                        "ERROR [time] error data\n");
+    CheckSink(sink_ptr, "DEBUG\t[time]\tdebug data\n"
+                        "INFO\t[time]\tinfo data\n"
+                        "WARNING\t[time]\twarning data\n"
+                        "ERROR\t[time]\terror data\n");
 } 
 
 TEST_CASE_METHOD(LoggerFixture, "Log level", "[Log]") {
@@ -63,6 +63,6 @@ TEST_CASE_METHOD(LoggerFixture, "Log level", "[Log]") {
     LOG_INFO() << "info data";
     LOG_WARNING() << "warning data";
     LOG_ERROR() << "error data";
-    CheckSink(sink_ptr, "WARNING [time] warning data\n"
-                        "ERROR [time] error data\n");
+    CheckSink(sink_ptr, "WARNING\t[time]\twarning data\n"
+                        "ERROR\t[time]\terror data\n");
 }

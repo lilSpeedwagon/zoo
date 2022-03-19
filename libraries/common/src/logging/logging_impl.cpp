@@ -29,10 +29,53 @@ Logger& LoggerFrontend::GetMainLogger() {
     return logger;
 }
 
-void InitMainLogger() {
+LoggerController::LoggerController(const LogSettings& settings)
+    : is_enabled_{false} {
+    Reconfigure(settings);
+}
+
+LoggerController::LoggerController(LoggerController&& controller) {
+    settings_ = std::move(controller.settings_);
+    control_thread_ = std::move(controller.control_thread_);
+    is_enabled_ = controller.is_enabled_;
+}
+
+LoggerController::~LoggerController() {
+    StopControlThread();
+}
+
+void LoggerController::Reconfigure(const LogSettings& settings) {
+    StopControlThread();
+    settings_ = settings;
+    
+    // todo lock logger
     auto& logger = LoggerFrontend::GetMainLogger();
-    logger.AddSink(std::make_shared<SinkStdout>());
-    LOG_DEBUG() << "Main logger is ready";
+    logger.SetLevelFilter(settings.log_level);
+    logger.SetBufferMaxSize(settings.buffer_max_size);
+    logger.SetLevelFilter(settings.log_level);
+    if (settings.log_to_stdout) {
+        logger.AddSink(std::make_shared<SinkStdout>());
+    }
+    RunControlThread();
+}
+
+void LoggerController::RunControlThread() {
+    is_enabled_ = true;
+    control_thread_ = std::thread(
+        [&enabled = is_enabled_](std::chrono::milliseconds flush_delay) {
+        while(enabled) {
+            auto& logger = LoggerFrontend::GetMainLogger();
+            logger.Flush();
+            std::this_thread::sleep_for(flush_delay);
+        }
+    }, settings_.flush_delay);
+}
+
+void LoggerController::StopControlThread() {
+    if (is_enabled_) {
+        is_enabled_ = false;
+        control_thread_.join();
+    }
 }
 
 } // namespace common::logging

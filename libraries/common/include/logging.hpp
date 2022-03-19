@@ -77,10 +77,30 @@ private:
 #define LOG_WARNING() LOG(common::logging::LogLevel::Warning)
 #define LOG_ERROR() LOG(common::logging::LogLevel::Error)
 
+struct LogSettings {
+    std::chrono::milliseconds flush_delay = std::chrono::milliseconds(100);
+    LogLevel log_level = LogLevel::Debug;
+    size_t buffer_max_size = 1024;
+    bool log_to_stdout = true;
+    // std::string path;
+    // size_t logrotate_size;
+};
 
-/// @brief Init main logger with the default sinks (stdout).
-/// TODO: spawn a new thread to flush log asynchronously.
-/// TODO: add log configuration for sinks, log format, min log level, etc.
-void InitMainLogger();
+/// @class Logger configurator and flushing thread holder.
+class LoggerController final {
+public:
+    LoggerController(const LogSettings& settings);
+    LoggerController(LoggerController&& controller);
+    ~LoggerController();
+    void Reconfigure(const LogSettings& settings);
+
+private:
+    void RunControlThread();
+    void StopControlThread();
+
+    std::thread control_thread_;
+    LogSettings settings_;
+    bool is_enabled_;
+};
 
 } // namespace common::logging

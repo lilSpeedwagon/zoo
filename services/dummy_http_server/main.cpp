@@ -28,15 +28,26 @@ http::Response handle_echo(http::Request&& request) {
     return response;
 }
 
+common::logging::LoggerController InitLogger() {
+    common::logging::LogSettings settings{};
+    settings.buffer_max_size = 100;
+    settings.flush_delay = std::chrono::milliseconds(100);
+    settings.log_level = common::logging::LogLevel::Debug;
+    settings.log_to_stdout = true;
+    common::logging::LoggerController controller(settings);
+    LOG_DEBUG() << "Logger is ready";
+    return controller;
+}
+
 int main() {
     setlocale(LC_ALL, "Russian");
 
     constexpr size_t kThreadPoolSize = 10;
     
     try {
-        common::logging::InitMainLogger();
+        auto log_controller = InitLogger();
 
-        LOG_INFO() << "setting up the server...";
+        LOG_INFO() << "Setting up the server...";
         auto io_context_ptr = std::make_shared<boost::asio::io_context>(kThreadPoolSize);
         auto server_ptr = std::make_shared<http::server::HttpServer>(
             io_context_ptr, kAddress, kPort);

@@ -24,7 +24,7 @@ std::string FormatLog(LogMsg&& msg) {
 
     std::stringstream ss{};
     ss << FormatLogLevel(msg.level);
-    ss << " [" << format::TimePointToString(msg.timepoint, kTimeFormat) << "] ";
+    ss << "\t[" << format::TimePointToString(msg.timepoint, kTimeFormat) << "]\t";
     ss << msg.message;
     return ss.str();
 }
