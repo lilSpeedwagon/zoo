@@ -7,7 +7,6 @@
 #include <boost/chrono.hpp>
 
 #include <common/include/format.hpp>
-#include <common/include/utils.hpp>
 
 namespace common::logging {
 
@@ -82,7 +81,8 @@ struct LogSettings {
     LogLevel log_level = LogLevel::Debug;
     size_t buffer_max_size = 1024;
     bool log_to_stdout = true;
-    // std::string path;
+    std::string path = ".\\";
+    std::string file_prefix = "log_";
     // size_t logrotate_size;
 };
 

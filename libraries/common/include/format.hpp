@@ -10,6 +10,9 @@ namespace common::format {
 constexpr std::string_view kDefaultTimeFormat = "%c";
 constexpr std::string_view kPlaceholder = "{}";
 
+/// @brief Converts timepoint to a string representation according
+/// with the specified format.
+/// (Format notes: https://en.cppreference.com/w/cpp/chrono/c/strftime)
 std::string TimePointToString(
     const std::chrono::system_clock::time_point& timepoint,
     const std::string_view& format = kDefaultTimeFormat);

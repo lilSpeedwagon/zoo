@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace common::utils {
+namespace common::utils::scope {
 
 /// @class Scope guard invokes callback when it will
 /// reach the borders of the current scope.
@@ -21,5 +21,5 @@ private:
     ScopeGuard& operator=(const ScopeGuard&);
     std::function<T> callback_;
 };
-    
-}
+
+} // namespace common::utils::scope

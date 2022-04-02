@@ -27,7 +27,9 @@ set(SOURCES
         src/logging/logging_impl.cpp
         src/logging/sink_stdout.cpp
         src/logging/sink_string.cpp
+        src/logging/sink_fs.cpp
         src/format/format.cpp
+        src/utils/errors.cpp
 )
 
 set(Boost_INCLUDE_DIR ${BOOST_DIR})

@@ -29,6 +29,10 @@ std::string FormatLog(LogMsg&& msg) {
     return ss.str();
 }
 
+bool IsEmpty(const std::stringstream& ss) {
+    return ss.rdbuf()->in_avail() == 0;
+}
+
 } // namespace
 
 Logger::Logger() {
@@ -53,6 +57,10 @@ void Logger::Flush() {
     std::stringstream ss{};
     {
         std::lock_guard lock(buffer_mutex_);
+        if (buffer_.empty()) {
+            return;
+        }
+
         while (!buffer_.empty()) {
             auto& msg = buffer_.front();
             if (msg.level >= level_filter_) {
@@ -61,7 +69,8 @@ void Logger::Flush() {
             buffer_.pop();
         }
     }
-    for (const auto& sink_ptr : sinks_) {
+
+    for (const auto sink_ptr : sinks_) {
         sink_ptr->Write(ss);
     }
 }

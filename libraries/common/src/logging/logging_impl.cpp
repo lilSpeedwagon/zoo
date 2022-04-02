@@ -4,6 +4,7 @@
 
 #include <common/src/logging/logger.hpp>
 #include <common/src/logging/sink_stdout.hpp>
+#include <common/src/logging/sink_fs.hpp>
 
 namespace common::logging {
 
@@ -38,6 +39,7 @@ LoggerController::LoggerController(LoggerController&& controller) {
     settings_ = std::move(controller.settings_);
     control_thread_ = std::move(controller.control_thread_);
     is_enabled_ = controller.is_enabled_;
+    controller.is_enabled_ = false;
 }
 
 LoggerController::~LoggerController() {
@@ -56,6 +58,8 @@ void LoggerController::Reconfigure(const LogSettings& settings) {
     if (settings.log_to_stdout) {
         logger.AddSink(std::make_shared<SinkStdout>());
     }
+    logger.AddSink(std::make_shared<SinkFS>(settings.path,
+                                            settings.file_prefix));
     RunControlThread();
 }
 
@@ -63,7 +67,7 @@ void LoggerController::RunControlThread() {
     is_enabled_ = true;
     control_thread_ = std::thread(
         [&enabled = is_enabled_](std::chrono::milliseconds flush_delay) {
-        while(enabled) {
+        while (enabled) {
             auto& logger = LoggerFrontend::GetMainLogger();
             logger.Flush();
             std::this_thread::sleep_for(flush_delay);

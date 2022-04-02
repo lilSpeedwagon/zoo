@@ -34,6 +34,8 @@ common::logging::LoggerController InitLogger() {
     settings.flush_delay = std::chrono::milliseconds(100);
     settings.log_level = common::logging::LogLevel::Debug;
     settings.log_to_stdout = true;
+    settings.path = "./";
+    settings.file_prefix = "log_";
     common::logging::LoggerController controller(settings);
     LOG_DEBUG() << "Logger is ready";
     return controller;
