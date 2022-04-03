@@ -2,6 +2,9 @@
 
 #include <boost/asio/strand.hpp>
 
+#include <common/include/logging.hpp>
+#include <common/include/format.hpp>
+
 #include <tcp_session/tcp_session.hpp>
 
 namespace http::server {
@@ -9,6 +12,7 @@ namespace http::server {
 namespace {
 
 namespace boost_http = boost::beast::http;
+namespace format = common::format;
 
 using ErrorCode = boost::beast::error_code;
 
@@ -81,10 +85,11 @@ HttpServer::HttpServer(std::shared_ptr<boost::asio::io_context> io_context_ptr,
                        const std::string& address, const unsigned short port) :
         io_context_ptr_{io_context_ptr},
         acceptor_{*io_context_ptr_,
-        boost::asio::ip::tcp::endpoint{boost::asio::ip::make_address(address), port}} {}
+            boost::asio::ip::tcp::endpoint{boost::asio::ip::make_address(address), port}} {}
 
 void HttpServer::AddListener(const std::string& uri, const Method verb,
                              const HttpHandler& handler) {
+    LOG_DEBUG() << "setup handler " << uri;
     handlers_.AddHandler(uri, verb, handler);
 }
 
@@ -92,13 +97,16 @@ void HttpServer::Listen() {
     ErrorCode error_code{};
     acceptor_.set_option(boost::asio::socket_base::reuse_address(true), error_code);
     if (error_code) {
-        return;
+        throw std::runtime_error(error_code.message());
     }
     
     acceptor_.listen(boost::asio::socket_base::max_listen_connections, error_code);
     if (error_code) {
-        return;
+        throw std::runtime_error(error_code.message());
     }
+
+    LOG_INFO() << "HttpServer is listening for incoming connections on port " 
+               << acceptor_.local_endpoint().port();
 
     AsyncAcceptNextConnection();
 }
@@ -113,11 +121,14 @@ void HttpServer::AsyncAcceptNextConnection() {
 
 void HttpServer::OnConnectionAccepted(
     const ErrorCode error_code, boost::asio::ip::tcp::socket socket) {
+
     if (!error_code) {
         auto on_request_ready = [this](Request&& request) {
             return this->HandleRequest(std::move(request));
         };
         std::make_shared<tcp::TcpSession>(on_request_ready, std::move(socket))->Run();
+    } else {
+        LOG_ERROR() << "error on accepting new connection: " << error_code.message();
     }
 
     // Accept another connection
@@ -125,14 +136,19 @@ void HttpServer::OnConnectionAccepted(
 }
 
 Response HttpServer::HandleRequest(Request&& request) {
+    LOG_INFO() << common::format::Format(
+        "HTTP {} {} {}\n{}", request.version(), request.method_string().to_string(),
+        request.target().to_string(), request.body());
+
     const auto version = request.version();
     const auto keep_alive = request.keep_alive();
     Response response{};
     try {
         response = RouteRequest(std::move(request));
-    } catch (const std::exception&
-    ) {
-        //LOG() << ex.what();
+    } catch (const std::exception& ex) {
+        LOG_ERROR() << format::Format("not handled exception in {} {}: {}",
+                                      request.method_string().to_string(),
+                                      request.target().to_string(), ex);
         response = ServerErrorResponse(version);
     }
     PrepareResponse(response, keep_alive);
@@ -144,11 +160,11 @@ Response HttpServer::RouteRequest(Request&& request) {
     auto uri = std::string(request.target());
     auto handler = handlers_.GetHandler(uri, method);
     if (!handler.has_value()) {
+        LOG_INFO() << format::Format("handler for {} {} not found",
+                                     request.method_string().to_string(), uri);
         return NotFoundResponse(std::move(request));
     }
-
     return handler.value()(std::move(request));
 }
-
 
 } // namespace http::server

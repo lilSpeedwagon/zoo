@@ -2,6 +2,8 @@
 
 #include <boost/asio/dispatch.hpp>
 
+#include <common/include/logging.hpp>
+
 namespace http::tcp {
 
 namespace {
@@ -9,7 +11,6 @@ namespace {
 constexpr std::chrono::seconds kDefaultOperationTimeout(10);
 
 } // namespace
-
 
 TcpSession::TcpSession(const HttpHandler& on_request_ready,
                        boost::asio::ip::tcp::socket&& socket)
@@ -25,6 +26,8 @@ void TcpSession::Run() {
 }
 
 void TcpSession::AsyncRead() {
+    LOG_DEBUG() << "tcp session wait for async read, timeout="
+                << kDefaultOperationTimeout.count();
     request_.clear();
     stream_.expires_after(kDefaultOperationTimeout);
     boost::beast::http::async_read(
@@ -37,12 +40,13 @@ void TcpSession::AsyncRead() {
 void TcpSession::OnRead(boost::beast::error_code error_code,
                         std::size_t /*bytes_transferred*/) {
     if (error_code == boost::beast::http::error::end_of_stream) {
+        LOG_DEBUG() << "tcp session end of stream";
         Close();
         return;
     }
 
     if (error_code) {
-        // throw or move exception to the main thread???
+        LOG_ERROR() << "tcp session read error: " << error_code.message();
         return;
     }
 
@@ -58,10 +62,11 @@ void TcpSession::OnRead(boost::beast::error_code error_code,
 void TcpSession::OnWrite(const bool close, boost::beast::error_code error_code, 
                          std::size_t /*bytes_transferred*/) {
     if (error_code) {
-        // LOG or something
+        LOG_ERROR() << "tcp session write error: " << error_code.message();
     }
 
     if (close) {
+        LOG_DEBUG() << "tcp session eof found on write";
         Close();
         return;
     }
@@ -70,10 +75,11 @@ void TcpSession::OnWrite(const bool close, boost::beast::error_code error_code,
 }
 
 void TcpSession::Close() {
+    LOG_DEBUG() << "tcp session close";
     boost::beast::error_code error;
     stream_.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, error);
     if (error) {
-        // Log or throw
+        LOG_ERROR() << "tcp session close error: " << error.message();
     }
 }
 
