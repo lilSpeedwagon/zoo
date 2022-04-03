@@ -35,13 +35,6 @@ Response ServerErrorResponse(unsigned int version) {
     return response;
 };
 
-Response ServerErrorResponse(Request&& request) {
-    auto response = MakeBaseResponse(std::move(request),
-                                     boost_http::status::internal_server_error);
-    response.body() = "Server error.";
-    return response;
-};
-
 Response NotFoundResponse(Request&& request) {
     auto response = MakeBaseResponse(std::move(request),
                                      boost_http::status::not_found);
