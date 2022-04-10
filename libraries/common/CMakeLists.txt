@@ -14,6 +14,7 @@ set(BOOST_DIR $ENV{BOOST_ROOT})
 
 # sources
 set(SOURCES
+    src/config/config.cpp
     src/logging/logger.cpp
     src/logging/logging_impl.cpp
     src/logging/sink_stdout.cpp
@@ -23,11 +24,8 @@ set(SOURCES
     src/utils/errors.cpp
 )
 
-# build static library
-add_library(${PROJECT_NAME} STATIC ${SOURCES})
-
-# setup include directories
-target_include_directories(${PROJECT_NAME} PRIVATE
+# headers
+set(HEADERS
     ${BOOST_DIR}
     ${LIBS_DIR}
     ${THIRDPARTY_LIBS}
@@ -35,17 +33,28 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ./src
 )
 
-# tests
-set(TEST_SOURCES
-    tests/main.cpp
-    tests/format.cpp
-    tests/log.cpp
-    ${SOURCES}
-)
-add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
-
-target_compile_options(${PROJECT_NAME} PRIVATE
+# compile options
+set(COMPILE_OPTIONS 
     -DBOOST_DATE_TIME_NO_LIB
     -DBOOST_CHRONO_HEADER_ONLY
     -pthread
 )
+
+# build static library
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${HEADERS})
+target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_OPTIONS})
+
+# test sources
+set(TEST_SOURCES
+    tests/config.cpp
+    tests/format.cpp
+    tests/log.cpp
+    tests/main.cpp
+    ${SOURCES}
+)
+
+set(TESTS_NAME ${PROJECT_NAME}_tests)
+add_executable(${TESTS_NAME} ${TEST_SOURCES})
+target_include_directories(${TESTS_NAME} PRIVATE ${HEADERS})
+target_compile_options(${TESTS_NAME} PRIVATE ${COMPILE_OPTIONS})
