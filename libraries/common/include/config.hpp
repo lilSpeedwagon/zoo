@@ -3,9 +3,9 @@
 #include <optional>
 #include <string>
 
-#include <format.hpp>
-#include <json.hpp>
-#include <utils/errors.hpp>
+#include <common/include/format.hpp>
+#include <common/include/json.hpp>
+#include <common/include/utils/errors.hpp>
 
 namespace common::config {
 

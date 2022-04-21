@@ -5,6 +5,7 @@
 #include <string>
 #include <optional>
 
+#include <common/include/config/logging_config.hpp>
 #include <common/include/logging.hpp>
 #include <common/include/format.hpp>
 
@@ -29,14 +30,8 @@ http::Response handle_echo(http::Request&& request) {
 }
 
 common::logging::LoggerController InitLogger() {
-    common::logging::LogSettings settings{};
-    settings.buffer_max_size = 100;
-    settings.flush_delay = std::chrono::milliseconds(100);
-    settings.log_level = common::logging::LogLevel::Debug;
-    settings.log_to_stdout = true;
-    settings.path = "./";
-    settings.file_prefix = "log_";
-    common::logging::LoggerController controller(settings);
+    auto log_config = common::config::GetLogConfig();
+    common::logging::LoggerController controller(log_config);
     LOG_DEBUG() << "Logger is ready";
     return controller;
 }
@@ -66,9 +61,9 @@ int main() {
             });
         io_context_ptr->run();
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << common::format::ToString(ex);
         return 1;
     }
 

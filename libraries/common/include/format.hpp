@@ -44,7 +44,7 @@ inline std::string ToString<std::string_view>(const std::string_view& value) {
 template<>
 inline std::string ToString<std::exception>(const std::exception& value) {
     std::stringstream ss{};
-    ss << "(" << typeid(value).name() << ") " << value.what();
+    ss << "[" << typeid(value).name() << "] " << value.what();
     return ss.str();
 }
 
