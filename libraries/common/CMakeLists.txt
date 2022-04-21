@@ -15,6 +15,7 @@ set(BOOST_DIR $ENV{BOOST_ROOT})
 # sources
 set(SOURCES
     src/config/config.cpp
+    src/config/logging_config.cpp
     src/logging/logger.cpp
     src/logging/logging_impl.cpp
     src/logging/sink_stdout.cpp
