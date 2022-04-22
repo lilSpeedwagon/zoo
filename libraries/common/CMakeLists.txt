@@ -48,6 +48,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 # test sources
 set(TEST_SOURCES
+    tests/utils.cpp
     tests/config.cpp
     tests/format.cpp
     tests/log.cpp
