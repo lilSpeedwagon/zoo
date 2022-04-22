@@ -12,7 +12,7 @@ ValueT GetOrDefault(
     const ContainerT& container, const KeyT& key, const ValueT& default) {
     if (const auto it = container.find(key);
         it != container.cend()) {
-        return *it;
+        return it->second;
     }
     return default;
 }
@@ -22,12 +22,12 @@ template<typename ContainerT, typename ValueT = ContainerT::mapped_type,
 std::optional<ValueT> GetOptional(const ContainerT& container, const KeyT& key) {
     if (const auto it = container.find(key);
         it != container.cend()) {
-        return *it;
+        return it->second;
     }
     return std::nullopt;
 }
 
-std::string ToLower(const std::string& str) {
+inline std::string ToLower(const std::string& str) {
     std::string result;
     result.reserve(str.size());
     std::transform(str.begin(), str.end(), std::back_inserter(result),
@@ -35,7 +35,7 @@ std::string ToLower(const std::string& str) {
     return result;
 }
 
-std::string ToUpper(const std::string& str) {
+inline std::string ToUpper(const std::string& str) {
     std::string result;
     result.reserve(str.size());
     std::transform(str.begin(), str.end(), std::back_inserter(result),
