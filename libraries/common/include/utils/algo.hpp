@@ -6,8 +6,8 @@
 
 namespace common::utils::algo {
 
-template<typename ContainerT, typename ValueT = ContainerT::mapped_type,
-         typename KeyT = ContainerT::key_type>
+template<typename ContainerT, typename ValueT = typename ContainerT::mapped_type,
+         typename KeyT = typename ContainerT::key_type>
 ValueT GetOrDefault(
     const ContainerT& container, const KeyT& key, const ValueT& default) {
     if (const auto it = container.find(key);
@@ -17,8 +17,8 @@ ValueT GetOrDefault(
     return default;
 }
 
-template<typename ContainerT, typename ValueT = ContainerT::mapped_type,
-         typename KeyT = ContainerT::key_type>
+template<typename ContainerT, typename ValueT = typename ContainerT::mapped_type,
+         typename KeyT = typename ContainerT::key_type>
 std::optional<ValueT> GetOptional(const ContainerT& container, const KeyT& key) {
     if (const auto it = container.find(key);
         it != container.cend()) {
