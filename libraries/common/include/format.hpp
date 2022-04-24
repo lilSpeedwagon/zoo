@@ -54,12 +54,6 @@ inline std::string ToString<std::chrono::system_clock::time_point>(
     return TimePointToString(timepoint);
 }
 
-template<typename ...Args>
-std::string Format(const std::string& format, Args&& ...args) {
-    auto format_copy = format;
-    return impl::FormatImpl(std::move(format_copy), std::forward<Args>(args)...);
-}
-
 namespace impl {
 
 inline std::string FormatImpl(std::string&& format) {
@@ -81,5 +75,11 @@ std::string FormatImpl(std::string&& format, T arg, Args&& ...args) {
 }
 
 } // namespace impl
+
+template<typename ...Args>
+std::string Format(const std::string& format, Args&& ...args) {
+    auto format_copy = format;
+    return impl::FormatImpl(std::move(format_copy), std::forward<Args>(args)...);
+}
 
 } // namespace common::format
