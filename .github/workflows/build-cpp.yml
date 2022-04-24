@@ -15,9 +15,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: install boost
-      run: sudo apt-get update && sudo apt-get install libboost-all-dev -y && export BOOST_ROOT=`whereis boost`
+      run: sudo apt-get update && sudo apt-get install libboost-all-dev -y
     - name: cmake configure
       working-directory: ./
+      env:
+        BOOST_ROOT: /usr/include/boost
       run: cmake .
     - name: make build
       working-directory: ./
