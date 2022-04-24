@@ -76,7 +76,6 @@ logging::LogSettings GetLogConfig(const std::string& path) {
         return GetLogConfigImpl(path);
     } catch (const std::exception& ex) {
         throw std::runtime_error(format::Format("Cannot load log config: {}", ex.what()));
-        //std::throw_with_nested(std::runtime_error("Cannot load log config"));
     }
 }
     
