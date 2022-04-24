@@ -9,12 +9,12 @@ namespace common::utils::algo {
 template<typename ContainerT>
 inline typename ContainerT::mapped_type GetOrDefault(
     const ContainerT& container, const typename ContainerT::key_type& key,
-    const typename ContainerT::mapped_type& default) {
+    const typename ContainerT::mapped_type& default_value) {
     if (const auto it = container.find(key);
         it != container.cend()) {
         return it->second;
     }
-    return default;
+    return default_value;
 }
 
 template<typename ContainerT>
