@@ -11,13 +11,13 @@ namespace {
 
 template<typename T>
 T GetOrDefault(const common::json::json& data, const std::string& key,
-               const T& default) {
+               const T& default_value) {
     if (const auto it = data.find(key);
         it != data.cend()) {
         return it->get<T>();
     }
     else {
-        return default;
+        return default_value;
     }
 }
 
