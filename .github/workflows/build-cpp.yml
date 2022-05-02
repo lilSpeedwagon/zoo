@@ -21,7 +21,7 @@ jobs:
       env:
         BOOST_ROOT: /usr/include/boost
       run: cmake .
-    - name: make build
+    - name: cmake build
       working-directory: ./
       run: cmake --build . --target dummy_service
     - name: run tests
