@@ -31,6 +31,7 @@ target_link_libraries(${PROJECT_NAME} lib_http)
 target_link_libraries(${PROJECT_NAME} lib_common)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
+    -lpthread
     -pthread
     -DBOOST_DATE_TIME_NO_LIB
     -DBOOST_CHRONO_HEADER_ONLY
