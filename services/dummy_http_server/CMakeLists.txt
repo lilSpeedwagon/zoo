@@ -3,13 +3,12 @@ cmake_minimum_required(VERSION 3.0)
 project(dummy_service)
 set (CMAKE_CXX_STANDARD 17)
 
+find_package(Threads REQUIRED)
 find_package(Boost REQUIRED)
 
 if(NOT DEFINED ENV{BOOST_INCLUDE_DIRS})
     message(WARNING "Env var BOOST_INCLUDE_DIRS is not declared. Boost lib may be not found.")
 endif()
-
-find_package(Threads REQUIRED)
 
 # setup libraries headers
 set(LIBS_DIR ../../libraries)
@@ -34,7 +33,7 @@ target_link_libraries(${PROJECT_NAME} lib_common)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    -lpthread
+    -pthread
     -pthread
     -DBOOST_DATE_TIME_NO_LIB
     -DBOOST_CHRONO_HEADER_ONLY

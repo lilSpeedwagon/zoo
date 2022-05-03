@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(lib_common)
 set (CMAKE_CXX_STANDARD 17)
 
+find_package(Threads REQUIRED)
 find_package(Boost COMPONENTS regex REQUIRED)
 
 if(NOT DEFINED ENV{BOOST_INCLUDE_DIRS} AND NOT Boost_FOUND)
@@ -47,6 +48,7 @@ set(COMPILE_OPTIONS
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${HEADERS})
 target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_OPTIONS})
+target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 # test sources
 set(TEST_SOURCES
@@ -62,4 +64,4 @@ set(TESTS_NAME ${PROJECT_NAME}_tests)
 add_executable(${TESTS_NAME} ${TEST_SOURCES})
 target_include_directories(${TESTS_NAME} PRIVATE ${HEADERS})
 target_compile_options(${TESTS_NAME} PRIVATE ${COMPILE_OPTIONS})
-target_link_libraries(${TESTS_NAME} Boost::regex)
+target_link_libraries(${TESTS_NAME} Boost::regex Threads::Threads)
