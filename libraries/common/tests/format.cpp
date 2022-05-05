@@ -29,9 +29,12 @@ TEST_CASE("ToString", "[Format]") {
         CheckString(ToString(std::string("hello")), "hello");
     }
 
-    SECTION("String") {
-        CheckString(ToString(std::chrono::system_clock::time_point()),
-                    "Thu Jan  1 03:00:00 1970");
+    SECTION("Timepoint") {
+        std::tm tm{0, 0, 0, 1, 0, 70, 0, 0, -1};
+        std::time_t time = std::mktime(&tm);
+        auto timepoint = std::chrono::system_clock::from_time_t(time);
+        CheckString(ToString(timepoint),
+                    "Thu Jan  1 00:00:00 1970");
     }
 }
 
