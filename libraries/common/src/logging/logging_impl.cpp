@@ -1,6 +1,7 @@
 #include <common/include/logging.hpp>
 
 #include <iostream>
+#include <pthread.h>
 
 #include <common/src/logging/logger.hpp>
 #include <common/src/logging/sink_stdout.hpp>

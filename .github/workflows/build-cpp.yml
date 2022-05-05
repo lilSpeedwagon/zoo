@@ -1,0 +1,29 @@
+name: C++ build and test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: install boost
+      run: sudo apt-get update && sudo apt-get install libboost-all-dev -y
+    - name: cmake configure
+      working-directory: ./
+      env:
+        BOOST_ROOT: /usr/include/boost
+      run: cmake .
+    - name: cmake build
+      working-directory: ./
+      run: cmake --build . --target dummy_service
+    - name: run tests
+      working-directory: ./
+      run: cmake --build . --target lib_common_tests && ./libraries/common/lib_common_tests

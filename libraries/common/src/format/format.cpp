@@ -23,7 +23,7 @@ std::string TimePointToString(
         throw std::runtime_error("Bad localtime conversion");
     }
     #else
-    auto result_ptr = localtime_s(&raw_time, &time_buffer);
+    auto result_ptr = localtime_r(&raw_time, &time_buffer);
     if (!result_ptr) {
         throw std::runtime_error("Bad localtime conversion");
     }

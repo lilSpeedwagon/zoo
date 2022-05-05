@@ -5,8 +5,18 @@
 
 #include <common/include/format.hpp>
 
+namespace {
+
+std::chrono::system_clock::time_point GetDefaultTime() {
+    std::tm tm{0, 0, 0, 1, 0, 70, 0, 0, -1};
+    std::time_t time = std::mktime(&tm);
+    return std::chrono::system_clock::from_time_t(time);
+}
+
 void CheckString(const std::string& str, const char* expected) {
     CHECK(str == std::string(expected));
+}
+
 }
 
 
@@ -29,9 +39,9 @@ TEST_CASE("ToString", "[Format]") {
         CheckString(ToString(std::string("hello")), "hello");
     }
 
-    SECTION("String") {
-        CheckString(ToString(std::chrono::system_clock::time_point()),
-                    "Thu Jan  1 03:00:00 1970");
+    SECTION("Timepoint") {
+        CheckString(ToString(GetDefaultTime()),
+                    "Thu Jan  1 00:00:00 1970");
     }
 }
 
@@ -69,8 +79,8 @@ TEST_CASE("Format", "[Format]") {
     }
 
     SECTION("Substitution (time)") {
-        CheckString(Format("{}", std::chrono::system_clock::time_point()),
-                    "Thu Jan  1 03:00:00 1970");
+        CheckString(Format("{}", GetDefaultTime()),
+                    "Thu Jan  1 00:00:00 1970");
     }
 
     SECTION("Substitution (mixed)") {

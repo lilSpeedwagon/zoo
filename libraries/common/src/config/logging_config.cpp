@@ -11,13 +11,13 @@ namespace {
 
 template<typename T>
 T GetOrDefault(const common::json::json& data, const std::string& key,
-               const T& default) {
+               const T& default_value) {
     if (const auto it = data.find(key);
         it != data.cend()) {
         return it->get<T>();
     }
     else {
-        return default;
+        return default_value;
     }
 }
 
@@ -76,7 +76,6 @@ logging::LogSettings GetLogConfig(const std::string& path) {
         return GetLogConfigImpl(path);
     } catch (const std::exception& ex) {
         throw std::runtime_error(format::Format("Cannot load log config: {}", ex.what()));
-        //std::throw_with_nested(std::runtime_error("Cannot load log config"));
     }
 }
     
