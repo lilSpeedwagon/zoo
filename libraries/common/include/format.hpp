@@ -22,7 +22,7 @@ std::string TimePointToString(
 std::string ShrinkString(const std::string& str, size_t limit = 256);
 
 inline std::string ToString(const char* value) {
-    return ShrinkString(value);
+    return std::string(value);
 }
 
 template<typename T>
@@ -37,7 +37,7 @@ inline std::string ToString<bool>(const bool& value) {
 
 template<>
 inline std::string ToString<std::string>(const std::string& value) {
-    return ShrinkString(value);
+    return value;
 }
 
 template<>

@@ -66,3 +66,11 @@ TEST_CASE_METHOD(LoggerFixture, "Log level", "[Log]") {
     CheckSink(sink_ptr, "WARNING\t[time]\twarning data\n"
                         "ERROR\t[time]\terror data\n");
 }
+
+TEST_CASE_METHOD(LoggerFixture, "Log msg max length", "[Log]") {
+    auto& logger = common::logging::LoggerFrontend::GetMainLogger();
+    logger.SetMessageMaxSize(5);
+
+    LOG_DEBUG() << "lorem ipsum";
+    CheckSink(sink_ptr, "DEBUG\t[time]\tlorem... (6 more chars)\n");
+}

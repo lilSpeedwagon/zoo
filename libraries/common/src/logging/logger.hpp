@@ -24,12 +24,16 @@ public:
     void SetBufferMaxSize(size_t size);
     size_t GetBufferMaxSize() const;
 
+    void SetMessageMaxSize(size_t size);
+    size_t GetMessageMaxSize() const;
+
 private:
     std::vector<LoggerSinkPtr> sinks_;
     size_t buffer_max_size_;
     std::recursive_mutex buffer_mutex_;
     std::queue<LogMsg> buffer_;
     LogLevel level_filter_;
+    size_t msg_max_size_;
 };
 
 } // namespace common::logging

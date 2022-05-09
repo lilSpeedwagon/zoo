@@ -19,13 +19,13 @@ std::string FormatLogLevel(const LogLevel level) {
     }
 }
 
-std::string FormatLog(LogMsg&& msg) {
+std::string FormatLog(LogMsg&& msg, size_t limit) {
     constexpr std::string_view kTimeFormat = "%F %T";
 
     std::stringstream ss{};
     ss << FormatLogLevel(msg.level);
     ss << "\t[" << format::TimePointToString(msg.timepoint, kTimeFormat) << "]\t";
-    ss << msg.message;
+    ss << common::format::ShrinkString(msg.message, limit);
     return ss.str();
 }
 
@@ -36,8 +36,10 @@ bool IsEmpty(const std::stringstream& ss) {
 } // namespace
 
 Logger::Logger() {
-    level_filter_ = LogLevel::Debug;
-    buffer_max_size_ = 100;
+    auto default_settings = LogSettings{};
+    level_filter_ = default_settings.log_level;
+    buffer_max_size_ = default_settings.buffer_max_size;
+    msg_max_size_ = default_settings.msg_max_size;
 }
 
 void Logger::Log(LogMsg&& msg) {
@@ -64,7 +66,7 @@ void Logger::Flush() {
         while (!buffer_.empty()) {
             auto& msg = buffer_.front();
             if (msg.level >= level_filter_) {
-                ss << FormatLog(std::move(msg)) << '\n';
+                ss << FormatLog(std::move(msg), msg_max_size_) << '\n';
             }
             buffer_.pop();
         }
@@ -101,6 +103,14 @@ void Logger::SetBufferMaxSize(size_t size) {
 
 size_t Logger::GetBufferMaxSize() const {
     return buffer_max_size_;
+}
+
+void Logger::SetMessageMaxSize(size_t size) {
+    msg_max_size_ = size;
+}
+
+size_t Logger::GetMessageMaxSize() const {
+    return msg_max_size_;
 }
 
 } // namespace common::logging
