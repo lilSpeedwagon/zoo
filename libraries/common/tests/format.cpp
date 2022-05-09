@@ -95,3 +95,9 @@ TEST_CASE("Format", "[Format]") {
                           Catch::Matchers::Contains("not enough arguments in Format() call"));
     }
 }
+
+
+TEST_CASE("Shrink", "[Format]") {
+    auto result = common::format::ShrinkString("Lorem ipsum", 5);
+    CheckString(result, "Lorem... (6 more chars)");
+}

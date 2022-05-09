@@ -17,8 +17,12 @@ std::string TimePointToString(
     const std::chrono::system_clock::time_point& timepoint,
     const std::string_view& format = kDefaultTimeFormat);
 
+
+/// @brief Shrinks string to the specified limit if needed.
+std::string ShrinkString(const std::string& str, size_t limit = 256);
+
 inline std::string ToString(const char* value) {
-    return std::string(value);
+    return ShrinkString(value);
 }
 
 template<typename T>
@@ -33,7 +37,7 @@ inline std::string ToString<bool>(const bool& value) {
 
 template<>
 inline std::string ToString<std::string>(const std::string& value) {
-    return value;
+    return ShrinkString(value);
 }
 
 template<>
