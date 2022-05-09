@@ -2,14 +2,8 @@
 
 #include <http/include/models.hpp>
 
-
 namespace http::utils {
 
-std::string ToString(const Method method) {
-    switch(method) {
-        case Method::get:
-            return "GET";
-    }
-}
+std::string ToString(const Method method);
 
 } // namespace http::utils

@@ -5,6 +5,7 @@
 
 #include <common/include/format.hpp>
 #include <common/include/logging.hpp>
+#include <http/include/utils.hpp>
 
 namespace http::client {
 
@@ -47,7 +48,8 @@ Response HttpClient::Request(const http::Request& request) {
     }
 
     LOG_DEBUG() << common::format::Format(
-        "{} {}:{}{}\n{}", request.method(), host_, port_, request.target(), request.body());
+        "requesting {} {}:{}{}\n{}", http::utils::ToString(request.method()),
+        host_, port_, request.target().to_string(), request.body());
 
     auto& context = *context_ptr_;
     auto const resolved_host = ResolveHost(context, host_, port_);
@@ -61,8 +63,9 @@ Response HttpClient::Request(const http::Request& request) {
 
     boost::beast::error_code ec{};
     stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-    if(ec /*&& ec != boost::beast::errc::not_connected*/) { // this error may be ok
-        throw std::runtime_error{ec.message()};
+    if(ec && ec != boost::beast::errc::not_connected) {
+        throw std::runtime_error{
+            common::format::Format("Socket closure error: ", ec.message())};
     }
 
     LOG_DEBUG() << common::format::Format(
