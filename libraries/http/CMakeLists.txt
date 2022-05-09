@@ -18,6 +18,7 @@ set(SOURCES
     ./src/http_server/http_server.cpp
     ./src/http_client/http_client.cpp
     ./src/tcp_session/tcp_session.cpp
+    ./src/utils/utils.cpp
 )
 
 # build static library

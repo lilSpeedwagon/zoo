@@ -3,6 +3,9 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
+#include <common/include/format.hpp>
+#include <common/include/logging.hpp>
+
 namespace http::client {
 
 namespace {
@@ -16,7 +19,9 @@ auto ResolveHost(boost::asio::io_context& context,
 } // namespace
 
 HttpClient::HttpClient(const std::string& host, int port) 
-    : host_{host}, port_{std::to_string(port)}, context_ptr_{} {}
+    : host_{host}, port_{std::to_string(port)} {
+        context_ptr_ = std::make_shared<boost::asio::io_context>();
+    }
 
 HttpClient::HttpClient(HttpClient&& client) {
     Swap(std::move(client));
@@ -37,6 +42,13 @@ void HttpClient::Swap(HttpClient&& other) {
 }
 
 Response HttpClient::Request(const http::Request& request) {
+    if (context_ptr_ == nullptr) {
+        throw std::runtime_error("IO context was not initialized");
+    }
+
+    LOG_DEBUG() << common::format::Format(
+        "{} {}:{}{}\n{}", request.method(), host_, port_, request.target(), request.body());
+
     auto& context = *context_ptr_;
     auto const resolved_host = ResolveHost(context, host_, port_);
    
@@ -52,6 +64,9 @@ Response HttpClient::Request(const http::Request& request) {
     if(ec /*&& ec != boost::beast::errc::not_connected*/) { // this error may be ok
         throw std::runtime_error{ec.message()};
     }
+
+    LOG_DEBUG() << common::format::Format(
+        "{} {}", result.result_int(), result.body());
 
     return result;
 }
