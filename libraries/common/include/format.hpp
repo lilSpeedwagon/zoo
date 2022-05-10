@@ -17,12 +17,16 @@ std::string TimePointToString(
     const std::chrono::system_clock::time_point& timepoint,
     const std::string_view& format = kDefaultTimeFormat);
 
+
+/// @brief Shrinks string to the specified limit if needed.
+std::string ShrinkString(const std::string& str, size_t limit = 256);
+
 inline std::string ToString(const char* value) {
     return std::string(value);
 }
 
 template<typename T>
-std::string ToString(const T& value) {
+inline std::string ToString(const T& value) {
     return std::to_string(value);
 }
 
@@ -65,12 +69,13 @@ inline std::string FormatImpl(std::string&& format) {
 }
 
 template<typename T, typename ...Args>
-std::string FormatImpl(std::string&& format, T arg, Args&& ...args) {
+std::string FormatImpl(std::string&& format, T&& arg, Args&& ...args) {
     const auto placeholder_index = format.find(kPlaceholder);
     if (placeholder_index == std::string::npos) {
         throw std::logic_error("extra arguments in Format() call");
     }
-    format.replace(placeholder_index, kPlaceholder.size(), ToString(arg));
+    format.replace(placeholder_index, kPlaceholder.size(),
+                   ToString(std::forward<T&&>(arg)));
     return FormatImpl(std::move(format), std::forward<Args>(args)...);
 }
 

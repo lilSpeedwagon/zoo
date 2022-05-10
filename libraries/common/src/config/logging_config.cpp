@@ -58,6 +58,7 @@ void from_json(const json::json& data, logging::LogSettings& config) {
     auto log_to_stdout = GetOrDefault<bool>(data, "log_to_stdout", true);
     auto path = GetOrDefault<std::string>(data, "path", ".\\");
     auto file_prefix = GetOrDefault<std::string>(data, "file_prefix", "log_");
+    auto msg_max_size = GetOrDefault<int>(data, "msg_max_size", 256);
 
     config.flush_delay = static_cast<std::chrono::milliseconds>(flush_delay);
     config.log_level = ParseLogLevel(log_level);
@@ -65,6 +66,7 @@ void from_json(const json::json& data, logging::LogSettings& config) {
     config.log_to_stdout = log_to_stdout;
     config.path = std::move(path);
     config.file_prefix = std::move(path);
+    config.msg_max_size = msg_max_size;
 }
 
 } // nemspace logging

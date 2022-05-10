@@ -55,6 +55,7 @@ void LoggerController::Reconfigure(const LogSettings& settings) {
     auto& logger = LoggerFrontend::GetMainLogger();
     logger.SetLevelFilter(settings.log_level);
     logger.SetBufferMaxSize(settings.buffer_max_size);
+    logger.SetMessageMaxSize(settings.msg_max_size);
     logger.SetLevelFilter(settings.log_level);
     if (settings.log_to_stdout) {
         logger.AddSink(std::make_shared<SinkStdout>());

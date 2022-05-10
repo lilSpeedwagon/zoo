@@ -24,6 +24,7 @@ class LoggerFixture {
 public:
     LoggerFixture() {
         auto& logger = common::logging::LoggerFrontend::GetMainLogger();
+        logger.SetLevelFilter(common::logging::LogLevel::Debug);
         logger.ResetSinks();
         sink_ptr = std::make_shared<common::logging::SinkString>();
         logger.AddSink(sink_ptr);
@@ -65,4 +66,12 @@ TEST_CASE_METHOD(LoggerFixture, "Log level", "[Log]") {
     LOG_ERROR() << "error data";
     CheckSink(sink_ptr, "WARNING\t[time]\twarning data\n"
                         "ERROR\t[time]\terror data\n");
+}
+
+TEST_CASE_METHOD(LoggerFixture, "Log msg max length", "[Log]") {
+    auto& logger = common::logging::LoggerFrontend::GetMainLogger();
+    logger.SetMessageMaxSize(5);
+
+    LOG_DEBUG() << "lorem ipsum";
+    CheckSink(sink_ptr, "DEBUG\t[time]\tlorem... (6 more chars)\n");
 }
