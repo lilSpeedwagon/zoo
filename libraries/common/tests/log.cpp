@@ -24,6 +24,7 @@ class LoggerFixture {
 public:
     LoggerFixture() {
         auto& logger = common::logging::LoggerFrontend::GetMainLogger();
+        logger.SetLevelFilter(common::logging::LogLevel::Debug);
         logger.ResetSinks();
         sink_ptr = std::make_shared<common::logging::SinkString>();
         logger.AddSink(sink_ptr);
