@@ -14,15 +14,21 @@ namespace {
 auto ResolveHost(boost::asio::io_context& context,
                  const std::string& host, const std::string& port) {
     boost::asio::ip::tcp::resolver resolver(context);
-    return resolver.resolve(host, port);
+    try {
+        return resolver.resolve(host, port);
+    } catch (const boost::system::system_error& ex) {
+        LOG_DEBUG() << ex.what();
+        throw std::runtime_error(common::format::Format(
+            "Cannot resolve host \'{}\': {}", host, ex.what()));
+    }
 }
 
 } // namespace
 
 HttpClient::HttpClient(const std::string& host, int port) 
     : host_{host}, port_{std::to_string(port)} {
-        context_ptr_ = std::make_shared<boost::asio::io_context>();
-    }
+    context_ptr_ = std::make_shared<boost::asio::io_context>();
+}
 
 HttpClient::HttpClient(HttpClient&& client) {
     Swap(std::move(client));
@@ -53,7 +59,7 @@ Response HttpClient::Request(const http::Request& request) {
 
     auto& context = *context_ptr_;
     auto const resolved_host = ResolveHost(context, host_, port_);
-   
+
     boost::beast::tcp_stream stream(context);
     stream.connect(resolved_host);
     boost::beast::http::write(stream, request);
