@@ -1,0 +1,80 @@
+openapi: "3.0.0"
+info:
+  description: "CRUD API configurator service allows users to create and configure simple CRUD API schemas."
+  version: "1.0.0"
+  title: "API config service"
+paths:
+  /ping:
+    get:
+      responses:
+        "200":
+          description: Server is up.
+        "500":
+          description: Something is wrong.
+  /api/v1/api-config/create:
+    post:
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                schema:
+                  $ref: "#/components/schemas/ApiSchemaInput"
+      responses:
+        "200":
+          description: Config was succesfully added.
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/ApiSchema"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+          
+components:
+  schemas:
+    ErrorReponse:
+      type: object
+      properties:
+        message:
+          type: string
+          
+    ApiSchemaInput:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        descsription:
+          type: string
+        schema:
+          type: object
+          
+    ApiSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+        author:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+        slug:
+          type: string
+        name:
+          type: string
+        descsription:
+          type: string
+        schema:
+          type: object
+  
