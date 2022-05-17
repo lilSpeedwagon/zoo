@@ -20,6 +20,7 @@ set(HEADERS_DIR ./src)
 set(SOURCES 
     main.cpp
     src/handlers/ping.cpp
+    src/handlers/create.cpp
 )
 
 # build executable
