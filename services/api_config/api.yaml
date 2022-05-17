@@ -13,14 +13,49 @@ paths:
           description: Something is wrong.
   /api/v1/api-config/create:
     post:
+      parameters:
+        - name: user
+          description: TODO delete after auth implementation
+          in: query
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           'application/json':
             schema:
               type: object
+              required:
+                - schema
               properties:
                 schema:
                   $ref: "#/components/schemas/ApiSchemaInput"
+      responses:
+        "200":
+          description: Config was succesfully added.
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/ApiSchema"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+                
+  /api/v1/api-config/list:
+    get:
+      parameters:
+        - name: user
+          description: TODO delete after auth implementation
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: Config was succesfully added.
@@ -42,15 +77,18 @@ components:
   schemas:
     ErrorReponse:
       type: object
+      required:
+        - message
       properties:
         message:
           type: string
           
     ApiSchemaInput:
       type: object
+      required:
+        - name
+        - schema
       properties:
-        slug:
-          type: string
         name:
           type: string
         descsription:
@@ -60,6 +98,13 @@ components:
           
     ApiSchema:
       type: object
+      required:
+        - id
+        - author
+        - created
+        - updated
+        - name
+        - schema
       properties:
         id:
           type: integer
@@ -68,8 +113,6 @@ components:
         created:
           type: string
         updated:
-          type: string
-        slug:
           type: string
         name:
           type: string
