@@ -59,6 +59,16 @@ TEST_CASE("Get", "[Config]") {
     CHECK(config_struct == epxected_struct);
 }
 
+TEST_CASE("Get invalid", "[Config]") {
+    common::json::json config_data = {
+        {"invalid_key", "value"},
+    };
+
+    auto config = common::config::Config::FromJson(config_data);
+    CHECK_THROWS_WITH(config.Get<ConfigStruct>(), 
+                      Catch::Matchers::Contains("key 'str_key' not found"));
+}
+
 TEST_CASE("GetPath", "[Config]") {
     common::json::json config_data = {
         {"str_key", "value"},
