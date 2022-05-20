@@ -6,6 +6,7 @@
 #include <common/include/thread_pool.hpp>
 #include <http/include/http_server.hpp>
 
+#include <handlers/create.hpp>
 #include <handlers/ping.hpp>
 
 static constexpr const char* kAddress = "127.0.0.1";
@@ -29,6 +30,8 @@ int main() {
             pool.GetContextPtr(), kAddress, kPort);
         server_ptr->AddListener("/ping", http::Method::get,
                                 &api_config::handlers::handle_ping);
+        server_ptr->AddListener("/api/v1/api-config/create", http::Method::post,
+                                &api_config::handlers::handle_create);
         server_ptr->Listen();
         pool.RunInThisThread();
     } catch (const std::exception& ex) {

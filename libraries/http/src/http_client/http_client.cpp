@@ -71,7 +71,7 @@ Response HttpClient::Request(const http::Request& request) {
     stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
     if(ec && ec != boost::beast::errc::not_connected) {
         throw std::runtime_error{
-            common::format::Format("Socket closure error: ", ec.message())};
+            common::format::Format("Socket closure error: {}", ec.message())};
     }
 
     LOG_DEBUG() << common::format::Format(

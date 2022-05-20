@@ -21,11 +21,12 @@ struct ApiConfigInput {
 };
 
 void from_json(const common::json::json& data, ApiConfigInput& config) {
-    data.at("name").get_to(config.name);
-    if (data.contains("description")) {
-        data.at("description").get_to(config.description);
+    auto schema = data.at("schema");
+    schema.at("name").get_to(config.name);
+    if (schema.contains("description")) {
+        schema.at("description").get_to(config.description);
     }
-    config.schema = data.at("schema");
+    config.schema = schema.at("schema");
 }
 
 } // namespace

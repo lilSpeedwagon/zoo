@@ -11,7 +11,7 @@ class HttpError : public std::runtime_error {
 public:
     HttpError(const char* msg) : std::runtime_error(msg) {}
     virtual ~HttpError() {}
-    virtual http::Status Code() const;
+    virtual http::Status Code() const = 0;
 };
 
 /// @class Bad request error. Code 400.

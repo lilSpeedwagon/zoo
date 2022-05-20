@@ -18,11 +18,9 @@ T Parse(const Request& request) {
     try {
         auto json_data = common::json::json::parse(request.body());
         return json_data.get<T>();
-    } catch (const common::json::detail::parse_error& ex) {
+    } catch (const common::json::detail::exception& ex) {
         throw exceptions::BadRequest(ex.what());
-    } catch (const common::json::detail::out_of_range& ex) {
-        throw exceptions::BadRequest(ex.what());
-    }   
+    }
 }
 
 } // namespace http::utils
