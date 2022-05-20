@@ -60,8 +60,8 @@ inline std::string ToString<std::chrono::system_clock::time_point>(
 
 namespace impl {
 
-inline std::string FormatImpl(std::string&& format) {
-    const auto placeholder_index = format.find(kPlaceholder);
+inline std::string FormatImpl(size_t last_pos, std::string&& format) {
+    const auto placeholder_index = format.find(kPlaceholder, last_pos);
     if (placeholder_index != std::string::npos) {
         throw std::logic_error("not enough arguments in Format() call");
     }
@@ -69,14 +69,15 @@ inline std::string FormatImpl(std::string&& format) {
 }
 
 template<typename T, typename ...Args>
-std::string FormatImpl(std::string&& format, T&& arg, Args&& ...args) {
-    const auto placeholder_index = format.find(kPlaceholder);
+std::string FormatImpl(size_t last_pos, std::string&& format, T&& arg, Args&& ...args) {
+    const auto placeholder_index = format.find(kPlaceholder, last_pos);
     if (placeholder_index == std::string::npos) {
         throw std::logic_error("extra arguments in Format() call");
     }
-    format.replace(placeholder_index, kPlaceholder.size(),
-                   ToString(std::forward<T&&>(arg)));
-    return FormatImpl(std::move(format), std::forward<Args>(args)...);
+    auto replacement = ToString(std::forward<T&&>(arg));
+    format.replace(placeholder_index, kPlaceholder.size(), replacement);
+    return FormatImpl(placeholder_index + replacement.size(),
+                      std::move(format), std::forward<Args>(args)...);
 }
 
 } // namespace impl
@@ -84,7 +85,7 @@ std::string FormatImpl(std::string&& format, T&& arg, Args&& ...args) {
 template<typename ...Args>
 std::string Format(const std::string& format, Args&& ...args) {
     auto format_copy = format;
-    return impl::FormatImpl(std::move(format_copy), std::forward<Args>(args)...);
+    return impl::FormatImpl(0, std::move(format_copy), std::forward<Args>(args)...);
 }
 
 } // namespace common::format
