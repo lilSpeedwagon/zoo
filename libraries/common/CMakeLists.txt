@@ -24,6 +24,7 @@ set(SOURCES
     src/logging/sink_string.cpp
     src/logging/sink_fs.cpp
     src/format/format.cpp
+    src/threading/thread_pool.cpp
     src/utils/errors.cpp
 )
 

@@ -44,3 +44,6 @@ libraries/boost_1_76_0
 
 # VS Code IDE
 .vscode/
+
+# Logs
+*.log

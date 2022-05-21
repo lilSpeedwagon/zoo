@@ -5,6 +5,7 @@
 #include <common/include/logging.hpp>
 #include <common/include/format.hpp>
 
+#include <exceptions.hpp>
 #include <tcp_session/tcp_session.hpp>
 
 namespace http::server {
@@ -41,6 +42,13 @@ Response NotFoundResponse(Request&& request) {
     response.body() = "Not found.";
     return response;
 };
+
+Response ResponseFromHttpError(unsigned int version, 
+                               const exceptions::HttpError& error) {
+    auto response = MakeBaseResponse(version, error.Code());
+    response.body() = error.what();
+    return response;
+}
 
 void PrepareResponse(Response& response, bool keep_alive) {
     response.set(boost_http::field::server, kServerVersion);
@@ -83,9 +91,9 @@ std::optional<HttpHandler> HttpHandlers::GetHandler(
 
 HttpServer::HttpServer(std::shared_ptr<boost::asio::io_context> io_context_ptr,
                        const std::string& address, const unsigned short port) :
-        io_context_ptr_{io_context_ptr},
-        acceptor_{*io_context_ptr_,
-            boost::asio::ip::tcp::endpoint{boost::asio::ip::make_address(address), port}} {}
+    io_context_ptr_{io_context_ptr},
+    acceptor_{*io_context_ptr_,
+        boost::asio::ip::tcp::endpoint{boost::asio::ip::make_address(address), port}} {}
 
 void HttpServer::AddListener(const std::string& uri, const Method verb,
                              const HttpHandler& handler) {
@@ -136,8 +144,8 @@ void HttpServer::OnConnectionAccepted(
 }
 
 Response HttpServer::HandleRequest(Request&& request) {
-    LOG_INFO() << common::format::Format(
-        "HTTP {} {} {}\n{}", request.version(), request.method_string().to_string(),
+    LOG_DEBUG() << common::format::Format(">>> HTTP/{} {} {} {}",
+        request.version(), request.method_string().to_string(),
         request.target().to_string(), request.body());
 
     const auto version = request.version();
@@ -145,6 +153,8 @@ Response HttpServer::HandleRequest(Request&& request) {
     Response response{};
     try {
         response = RouteRequest(std::move(request));
+    } catch (const exceptions::HttpError& error) {
+        response = ResponseFromHttpError(version, error);
     } catch (const std::exception& ex) {
         LOG_ERROR() << format::Format("not handled exception in {} {}: {}",
                                       request.method_string().to_string(),
@@ -152,6 +162,9 @@ Response HttpServer::HandleRequest(Request&& request) {
         response = ServerErrorResponse(version);
     }
     PrepareResponse(response, keep_alive);
+
+    LOG_DEBUG() << common::format::Format("<<< HTTP/{} {} {}",
+        response.version(), response.result_int(), response.body());
     return response;
 }
 

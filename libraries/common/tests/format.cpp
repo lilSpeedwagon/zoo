@@ -97,6 +97,24 @@ TEST_CASE("Format", "[Format]") {
 }
 
 
+TEST_CASE("Argument with placeholder", "[Format]") {
+    SECTION("Placeholder as argument") {
+        auto result = common::format::Format("result: {}", "{}");
+        CheckString(result, "result: {}");
+    }
+
+    SECTION("Collapsed placeholder") {
+        auto result = common::format::Format("result: {{}}", "");
+        CheckString(result, "result: {}");
+    }
+
+    SECTION("Appended placeholder") {
+        auto result = common::format::Format("result: {}}", "{");
+        CheckString(result, "result: {}");
+    }
+}
+
+
 TEST_CASE("Shrink", "[Format]") {
     auto result = common::format::ShrinkString("Lorem ipsum", 5);
     CheckString(result, "Lorem... (6 more chars)");
