@@ -9,8 +9,9 @@ So it is a C++ pet project intended for the implementation of the basic web serv
 - async HTTP server :white_check_mark:
 - logger :white_check_mark:
 - static configs :white_check_mark:
-- HTTP client
+- HTTP client :white_check_mark:
 - test system
+- global components system
 - key-value database
 - deploy system
 - caches
