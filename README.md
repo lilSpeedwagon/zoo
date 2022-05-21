@@ -1,4 +1,8 @@
 # zoo
+[![Generic badge](https://img.shields.io/badge/purpose-education-orange.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/lang-cpp-blue.svg)](https://shields.io/)
+[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lilSpeedwagon/zoo/C++%20build%20and%20test?label=build)
 
 Modern C++ projects and web services are based on the powerful frameworks and libraries. 
 Most of them are efficient and easy-to-use, and there is no need in an another "cool C++ framework". 
