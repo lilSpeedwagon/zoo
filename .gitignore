@@ -27,6 +27,9 @@
 *.out
 *.app
 
+# Python compiled
+*.pyc
+
 # Build directory
 build/
 
