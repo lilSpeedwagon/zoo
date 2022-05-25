@@ -91,7 +91,7 @@ components:
       properties:
         name:
           type: string
-        descsription:
+        description:
           type: string
         schema:
           type: object
