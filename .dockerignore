@@ -1,0 +1,15 @@
+# git
+.git*
+
+# IDE
+.vscode
+
+# repository docs
+LICENSE
+*.md
+
+# build
+build
+
+# tmp files
+*.log
