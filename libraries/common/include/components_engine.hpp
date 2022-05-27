@@ -27,16 +27,17 @@ public:
 
     /// @brief Get a component of the specified type.
     /// @throws std::logic_error if such a component is not registered.
-    template<typename T, 
-             typename = std::enable_if<std::is_base_of<ComponentBase, T>::value> >
-    std::shared_ptr<T> Get() {
+    template<typename T>
+    std::shared_ptr<
+        typename std::enable_if<std::is_base_of<ComponentBase, T>::value, T>::type
+    > Get() {
         const auto name = T::kName;
         if (auto it = components_.find(name);
             it != components_.cend()) {
             return std::dynamic_pointer_cast<T>(it->second);
         }
         throw std::logic_error(
-                format::Format("component '{}' is not registered", name));
+            format::Format("component '{}' is not registered", name));
     }
 
 private:
