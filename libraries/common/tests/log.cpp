@@ -9,6 +9,8 @@
 #include <common/src/logging/logger.hpp>
 #include <common/src/logging/sink_string.hpp>
 
+namespace common::tests::log {
+
 namespace {
 
 static constexpr std::string_view kTimePlaceholder = "time";
@@ -75,3 +77,5 @@ TEST_CASE_METHOD(LoggerFixture, "Log msg max length", "[Log]") {
     LOG_DEBUG() << "lorem ipsum";
     CheckSink(sink_ptr, "DEBUG\t[time]\tlorem... (6 more chars)\n");
 }
+
+} // namespace common::tests::log
