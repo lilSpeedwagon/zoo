@@ -5,6 +5,8 @@
 
 #include <common/include/format.hpp>
 
+namespace common::tests::format {
+
 namespace {
 
 std::chrono::system_clock::time_point GetDefaultTime() {
@@ -17,7 +19,7 @@ void CheckString(const std::string& str, const char* expected) {
     CHECK(str == std::string(expected));
 }
 
-}
+} // namespace
 
 
 TEST_CASE("ToString", "[Format]") {
@@ -119,3 +121,5 @@ TEST_CASE("Shrink", "[Format]") {
     auto result = common::format::ShrinkString("Lorem ipsum", 5);
     CheckString(result, "Lorem... (6 more chars)");
 }
+
+} // namespace common::tests::format

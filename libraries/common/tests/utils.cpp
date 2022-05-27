@@ -5,11 +5,7 @@
 
 #include <common/include/utils/algo.hpp>
 
-namespace {
-
-
-
-} // namespace
+namespace common::tests::utils {
 
 TEST_CASE("ToLower", "[Algo]") {
     std::string str = "sOme StRinG-123";
@@ -40,3 +36,5 @@ TEST_CASE("GetorDefault", "[Algo]") {
     CHECK(common::utils::algo::GetOrDefault(map, "key", 2) == 1);
     CHECK(common::utils::algo::GetOrDefault(map, "key3", 2) == 2);
 }
+
+} // namespace common::tests::utils

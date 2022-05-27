@@ -6,6 +6,8 @@
 
 #include <common/include/config.hpp>
 
+namespace common::tests::config {
+
 namespace {
 
 struct NestedConfig {
@@ -129,3 +131,5 @@ TEST_CASE("GetPath", "[Config]") {
                           Catch::Matchers::Contains("invalid config path"));
     }
 }
+
+} // namespace common::tests::config 
