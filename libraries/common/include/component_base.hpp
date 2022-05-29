@@ -8,14 +8,16 @@ namespace common::components {
 /// @class Base class for the pieces of components system.
 class ComponentBase {
 public:
-    static const std::string kName;
+    /// Unique name of the component.
+    /// Must be overriden in the inherited class.
+    static constexpr const char* kName = "base";
 
-    ComponentBase() : is_ready_{false} {}
-    virtual ~ComponentBase() {}
+    ComponentBase();
+    virtual ~ComponentBase();
 
-    bool IsReady() const { return is_ready_; }
+    bool IsReady() const;
+    virtual const char* Name() const = 0;
     virtual void Init() = 0;
-    virtual std::string Name() const = 0;
 
 protected:
     bool is_ready_;

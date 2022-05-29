@@ -18,7 +18,7 @@ public:
 class CustomComponent 
     : public common::components::ComponentBase {
 public:
-    static const std::string kName;
+    static constexpr const char* kName = "custom";
 
     CustomComponent() {}
     virtual ~CustomComponent() {}
@@ -26,12 +26,10 @@ public:
     void Init() override {
         is_ready_ = true;
     }
-    std::string Name() const override {
+    const char* Name() const override {
         return kName;
     }
 };
-
-const std::string CustomComponent::kName = "custom";
 
 } // namespace
 
