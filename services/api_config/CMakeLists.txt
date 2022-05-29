@@ -19,6 +19,7 @@ set(HEADERS_DIR ./src)
 # sources
 set(SOURCES 
     main.cpp
+    src/components/api_storage.cpp
     src/handlers/ping.cpp
     src/handlers/create.cpp
 )
