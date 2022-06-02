@@ -37,9 +37,9 @@ public:
 
     void Init() override;
 
-    void Insert(const models::ApiConfig& api);
-    bool Update(const models::ApiConfig& api);
-    bool Delete(const std::string& name);
+    ApiConfigData Insert(const models::ApiConfig& api);
+    ApiConfigData Update(const models::ApiConfig& api);
+    ApiConfigData Delete(const std::string& name);
     std::optional<ApiConfigData> Get(const std::string& name) const;
 
 private:

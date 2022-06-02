@@ -13,7 +13,7 @@ const char* ApiConfigStorage::Name() const {
 
 void ApiConfigStorage::Init() {}
 
-void ApiConfigStorage::Insert(const models::ApiConfig& api) {
+ApiConfigData ApiConfigStorage::Insert(const models::ApiConfig& api) {
     const auto it = apis_.find(api.name);
     if (it != apis_.end()) {
         throw std::runtime_error(common::format::Format(
@@ -32,20 +32,29 @@ void ApiConfigStorage::Insert(const models::ApiConfig& api) {
         std::move(meta), // metadata
     };
     apis_[api.name] = std::move(data);
+    return data;
 }
 
-bool ApiConfigStorage::Update(const models::ApiConfig& api) {
+ApiConfigData ApiConfigStorage::Update(const models::ApiConfig& api) {
     const auto it = apis_.find(api.name);
     if (it != apis_.end()) {
         it->second.metadata.updated = std::chrono::system_clock::now();
         it->second.data = api;
-        return true;
+        return it->second;
     }
-    return false;
+    throw std::runtime_error(
+        common::format::Format("Config '{}' not found", api.name));
 }
 
-bool ApiConfigStorage::Delete(const std::string& name) {
-    return apis_.erase(name) != 0;
+ApiConfigData ApiConfigStorage::Delete(const std::string& name) {
+    const auto it = apis_.find(name);
+    if (it != apis_.end()) {
+        auto data = it->second;
+        apis_.erase(it);
+        return data;
+    }
+    throw std::runtime_error(
+        common::format::Format("Config '{}' not found", name));
 }
 
 std::optional<ApiConfigData> ApiConfigStorage::Get(
