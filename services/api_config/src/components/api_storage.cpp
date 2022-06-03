@@ -4,6 +4,13 @@
 
 namespace api_config::components {
 
+namespace {
+
+using models::ApiConfigData;
+using models::Metadata;
+
+} // namespace
+
 ApiConfigStorage::ApiConfigStorage() : id_counter_{0} {}
 ApiConfigStorage::~ApiConfigStorage() {}
 
@@ -31,7 +38,7 @@ ApiConfigData ApiConfigStorage::Insert(const models::ApiConfig& api) {
         api,             // data
         std::move(meta), // metadata
     };
-    apis_[api.name] = std::move(data);
+    apis_[api.name] = data;
     return data;
 }
 

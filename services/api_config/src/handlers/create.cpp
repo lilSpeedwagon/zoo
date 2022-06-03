@@ -13,33 +13,22 @@
 
 namespace api_config::handlers {
 
-namespace {
-
-// void from_json(const common::json::json& data, models::ApiConfig& config) {
-//     auto schema = data.at("schema");
-//     schema.at("name").get_to(config.name);
-//     if (schema.contains("description")) {
-//         schema.at("description").get_to(config.description);
-//     }
-//     config.schema = schema.at("schema");
-// }
-
-} // namespace
-
 http::Response handle_create(http::Request&& request) {
     LOG_INFO() << "/api/v1/api-config/create";
     auto config = http::utils::Parse<models::ApiConfig>(request);
     auto storage_ptr = common::components::ComponentsEngine::GetInstance()
         .Get<components::ApiConfigStorage>();
+    
+    std::optional<models::ApiConfigData> inserted{};
     try {
-        storage_ptr->Insert(config);
+        inserted = storage_ptr->Insert(config);
     } catch (const std::runtime_error& ex) {
         LOG_INFO() << ex.what();
         throw http::exceptions::BadRequest(ex.what());
     }
+    common::json::json response_json = inserted.value();
     http::Response response{http::Status::ok, request.version()};
-    response.body() = "OK";
-    // TODO: put stored data to response
+    response.body() = response_json.dump();
     return response;
 }
 

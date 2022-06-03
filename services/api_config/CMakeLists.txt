@@ -22,6 +22,7 @@ set(SOURCES
     src/components/api_storage.cpp
     src/handlers/ping.cpp
     src/handlers/create.cpp
+    src/models/api_config.cpp
 )
 
 # build executable
