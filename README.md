@@ -14,8 +14,8 @@ So it is a C++ pet project intended for the implementation of the basic web serv
 - logger :white_check_mark:
 - static configs :white_check_mark:
 - HTTP client :white_check_mark:
+- global components system :white_check_mark:
 - test system
-- global components system
 - key-value database
 - deploy system
 - caches
