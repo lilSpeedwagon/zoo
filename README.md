@@ -35,3 +35,16 @@ So it is a C++ pet project intended for the implementation of the basic web serv
 - [Catch2](https://github.com/catchorg/Catch2)
 - [JSON for Modern C++](https://github.com/nlohmann/json)
 - [pytest](https://docs.pytest.org/)
+
+## Development env requirements
+1. Ubuntu 18 and later. You can try Windows, but there may be some problems with libraries detection.
+2. GCC with C++17 support.
+3. Python 3.10 and later.
+4. Cmake 3.0 and later.
+5. Boost 1.76 and later.
+6. VS code extensions:
+    * C/C++
+    * CMake
+    * CMake tools
+    * Python
+    * Test explorer UI
