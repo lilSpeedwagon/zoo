@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <unordered_map>
+
 #include <common/include/json.hpp>
 
 #include <http/include/exceptions.hpp>
@@ -22,5 +25,8 @@ T Parse(const Request& request) {
         throw exceptions::BadRequest(ex.what());
     }
 }
+
+/// @brief Get map of http request params.
+std::unordered_map<std::string, std::string> GetParams(const Request& request);
 
 } // namespace http::utils
