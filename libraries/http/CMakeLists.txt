@@ -21,12 +21,8 @@ set(SOURCES
     ./src/utils/utils.cpp
 )
 
-# build static library
-add_library(${PROJECT_NAME} STATIC ${SOURCES})
-
-# link libs
-target_link_libraries(${PROJECT_NAME} lib_common)
-target_include_directories(${PROJECT_NAME} PRIVATE
+# headers
+set(HEADERS
     ${BOOST_INCLUDE_DIRS}
     ${LIBS_DIR}
     ${THIRDPARTY_LIBS}
@@ -34,8 +30,30 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ./src
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-    -pthread
+# compile options
+set(COMPILE_OPTIONS 
     -DBOOST_DATE_TIME_NO_LIB
     -DBOOST_CHRONO_HEADER_ONLY
+    -pthread
 )
+
+# build static library
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
+
+# link libs
+target_link_libraries(${PROJECT_NAME} lib_common)
+target_include_directories(${PROJECT_NAME} PRIVATE ${HEADERS})
+target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_OPTIONS})
+
+# test sources
+set(TEST_SOURCES
+    tests/main.cpp
+    tests/utils.cpp
+    ${SOURCES}
+)
+
+set(TESTS_NAME ${PROJECT_NAME}_tests)
+add_executable(${TESTS_NAME} ${TEST_SOURCES})
+target_link_libraries(${TESTS_NAME} lib_common)
+target_include_directories(${TESTS_NAME} PRIVATE ${HEADERS})
+target_compile_options(${TESTS_NAME} PRIVATE ${COMPILE_OPTIONS})
