@@ -20,8 +20,10 @@ set(HEADERS_DIR ./src)
 set(SOURCES 
     main.cpp
     src/components/api_storage.cpp
-    src/handlers/ping.cpp
     src/handlers/create.cpp
+    src/handlers/get.cpp
+    src/handlers/list.cpp
+    src/handlers/ping.cpp
     src/models/api_config.cpp
 )
 

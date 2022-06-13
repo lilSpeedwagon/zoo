@@ -9,6 +9,8 @@
 
 #include <components/api_storage.hpp>
 #include <handlers/create.hpp>
+#include <handlers/get.hpp>
+#include <handlers/list.hpp>
 #include <handlers/ping.hpp>
 
 static constexpr const char* kAddress = "127.0.0.1";
@@ -43,6 +45,10 @@ int main() {
                                 &api_config::handlers::handle_ping);
         server_ptr->AddListener("/api/v1/api-config/create", http::Method::post,
                                 &api_config::handlers::handle_create);
+        server_ptr->AddListener("/api/v1/api-config/get", http::Method::get,
+                                &api_config::handlers::handle_get);
+        server_ptr->AddListener("/api/v1/api-config/list", http::Method::get,
+                                &api_config::handlers::handle_list);
         server_ptr->Listen();
         pool.RunInThisThread();
     } catch (const std::exception& ex) {

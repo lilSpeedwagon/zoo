@@ -21,12 +21,6 @@ const char* ApiConfigStorage::Name() const {
 void ApiConfigStorage::Init() {}
 
 ApiConfigData ApiConfigStorage::Insert(const models::ApiConfig& api) {
-    const auto it = apis_.find(api.name);
-    if (it != apis_.end()) {
-        throw std::runtime_error(common::format::Format(
-            "item with name '{}' already exists", api.name));
-    }
-
     const auto now = std::chrono::system_clock::now();
     Metadata meta {
         GetNextId(), // id
@@ -38,39 +32,47 @@ ApiConfigData ApiConfigStorage::Insert(const models::ApiConfig& api) {
         api,             // data
         std::move(meta), // metadata
     };
-    apis_[api.name] = data;
+    apis_[data.metadata.id] = data;
     return data;
 }
 
-ApiConfigData ApiConfigStorage::Update(const models::ApiConfig& api) {
-    const auto it = apis_.find(api.name);
+ApiConfigData ApiConfigStorage::Update(uint64_t id, const models::ApiConfig& api) {
+    const auto it = apis_.find(id);
     if (it != apis_.end()) {
         it->second.metadata.updated = std::chrono::system_clock::now();
         it->second.data = api;
         return it->second;
     }
     throw std::runtime_error(
-        common::format::Format("Config '{}' not found", api.name));
+        common::format::Format("Config '{}' not found", id));
 }
 
-ApiConfigData ApiConfigStorage::Delete(const std::string& name) {
-    const auto it = apis_.find(name);
+ApiConfigData ApiConfigStorage::Delete(uint64_t id) {
+    const auto it = apis_.find(id);
     if (it != apis_.end()) {
         auto data = it->second;
         apis_.erase(it);
         return data;
     }
     throw std::runtime_error(
-        common::format::Format("Config '{}' not found", name));
+        common::format::Format("Config '{}' not found", id));
 }
 
-std::optional<ApiConfigData> ApiConfigStorage::Get(
-    const std::string& name) const {
-    if (auto it = apis_.find(name);
+std::optional<ApiConfigData> ApiConfigStorage::Get(uint64_t id) const {
+    if (auto it = apis_.find(id);
         it != apis_.end()) {
         return it->second;
     }
     return std::nullopt;
+}
+
+std::vector<models::ApiConfigData> ApiConfigStorage::List() const {
+    std::vector<models::ApiConfigData> result{};
+    result.reserve(apis_.size());
+    for (const auto& [_, api] : apis_) {
+        result.push_back(api);
+    }
+    return result;
 }
 
 uint64_t ApiConfigStorage::GetNextId() {

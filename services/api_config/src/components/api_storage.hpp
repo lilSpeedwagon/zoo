@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 #include <unordered_map>
 
 #include <common/include/component_base.hpp>
@@ -24,14 +25,15 @@ public:
     void Init() override;
 
     models::ApiConfigData Insert(const models::ApiConfig& api);
-    models::ApiConfigData Update(const models::ApiConfig& api);
-    models::ApiConfigData Delete(const std::string& name);
-    std::optional<models::ApiConfigData> Get(const std::string& name) const;
+    models::ApiConfigData Update(uint64_t id, const models::ApiConfig& api);
+    models::ApiConfigData Delete(uint64_t name);
+    std::optional<models::ApiConfigData> Get(uint64_t name) const;
+    std::vector<models::ApiConfigData> List() const;
 
 private:
     uint64_t GetNextId();
 
-    std::unordered_map<std::string, models::ApiConfigData> apis_;
+    std::unordered_map<uint64_t, models::ApiConfigData> apis_;
     uint64_t id_counter_;
 };
 
