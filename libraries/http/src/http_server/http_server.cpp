@@ -72,6 +72,8 @@ void PrepareResponse(Response& response, bool keep_alive) {
 
 HttpHandlers::HttpHandlers() : handlers_{} {}
 
+HttpHandlers::~HttpHandlers() {}
+
 void HttpHandlers::AddHandler(const std::string& uri,
                               const Method method,
                               const HttpHandler& handler) {
@@ -110,6 +112,11 @@ void HttpServer::AddListener(const std::string& uri, const Method verb,
                              const HttpHandler& handler) {
     LOG_DEBUG() << "setup handler " << uri;
     handlers_.AddHandler(uri, verb, handler);
+}
+
+HttpHandler& HttpServer::GetListener(
+    const std::string& uri, const Method method) const {
+    handlers_.GetHandler(uri, method);
 }
 
 void HttpServer::Listen() {
