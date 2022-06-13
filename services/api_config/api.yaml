@@ -11,6 +11,7 @@ paths:
           description: Server is up.
         "500":
           description: Something is wrong.
+
   /api/v1/api-config/create:
     post:
       parameters:
@@ -46,6 +47,43 @@ paths:
             'application/json':
               schema:
                 $ref: "#/components/schemas/ErrorReponse"
+
+  /api/v1/api-config/get:
+    get:
+      parameters:
+        - name: user
+          description: TODO delete after auth implementation
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Config exists.
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/ApiSchema"
+        "400":
+          description: Not found.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
                 
   /api/v1/api-config/list:
     get:
@@ -63,9 +101,13 @@ paths:
             'application/json':
               schema:
                 type: object
+                required:
+                  - items
                 properties:
-                  schema:
-                    $ref: "#/components/schemas/ApiSchema"
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiSchema"
         "404":
           description: Bad request.
           content:
