@@ -17,6 +17,7 @@ namespace http::server {
 class HttpHandlers {
 public:
     HttpHandlers();
+    ~HttpHandlers();
 
     void AddHandler(const std::string& uri, const Method method, const HttpHandler& handler);
     void RemoveHandler(const std::string& uri, const Method method);
@@ -45,6 +46,7 @@ public:
     void Listen();
     void AddListener(const std::string& uri, const Method method,
                      const HttpHandler& handler);
+    HttpHandler& GetListener(const std::string& uri, const Method method) const;
 
 private:
     void AsyncAcceptNextConnection();

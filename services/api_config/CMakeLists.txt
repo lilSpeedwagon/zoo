@@ -19,8 +19,12 @@ set(HEADERS_DIR ./src)
 # sources
 set(SOURCES 
     main.cpp
-    src/handlers/ping.cpp
+    src/components/api_storage.cpp
     src/handlers/create.cpp
+    src/handlers/get.cpp
+    src/handlers/list.cpp
+    src/handlers/ping.cpp
+    src/models/api_config.cpp
 )
 
 # build executable

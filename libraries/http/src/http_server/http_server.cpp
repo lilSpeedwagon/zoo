@@ -20,6 +20,17 @@ using ErrorCode = boost::beast::error_code;
 constexpr boost::string_view kServerVersion = "SelfMadeZoo Http 0.1";
 constexpr boost::string_view kContentText = "text/html";
 
+/// @brief returns request path without params
+std::string GetPath(const Request& request) {
+    static const char kPathArgumentsPrefix = '?';
+    auto path = std::string(request.target());
+    if (auto it = std::find(path.begin(), path.end(), kPathArgumentsPrefix);
+        it != path.end()) {
+        return std::string(path.begin(), it);
+    }
+    return path;
+}
+
 Response MakeBaseResponse(const unsigned version,
                           const boost_http::status status = boost_http::status::ok) {
     return Response{status, version};
@@ -61,6 +72,8 @@ void PrepareResponse(Response& response, bool keep_alive) {
 
 HttpHandlers::HttpHandlers() : handlers_{} {}
 
+HttpHandlers::~HttpHandlers() {}
+
 void HttpHandlers::AddHandler(const std::string& uri,
                               const Method method,
                               const HttpHandler& handler) {
@@ -99,6 +112,11 @@ void HttpServer::AddListener(const std::string& uri, const Method verb,
                              const HttpHandler& handler) {
     LOG_DEBUG() << "setup handler " << uri;
     handlers_.AddHandler(uri, verb, handler);
+}
+
+HttpHandler& HttpServer::GetListener(
+    const std::string& uri, const Method method) const {
+    handlers_.GetHandler(uri, method);
 }
 
 void HttpServer::Listen() {
@@ -170,11 +188,11 @@ Response HttpServer::HandleRequest(Request&& request) {
 
 Response HttpServer::RouteRequest(Request&& request) {
     auto method = request.method();
-    auto uri = std::string(request.target());
-    auto handler = handlers_.GetHandler(uri, method);
+    auto path = GetPath(request);
+    auto handler = handlers_.GetHandler(path, method);
     if (!handler.has_value()) {
         LOG_INFO() << format::Format("handler for {} {} not found",
-                                     request.method_string().to_string(), uri);
+                                     request.method_string().to_string(), path);
         return NotFoundResponse(std::move(request));
     }
     return handler.value()(std::move(request));

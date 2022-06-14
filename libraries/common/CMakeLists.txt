@@ -16,6 +16,7 @@ set(THIRDPARTY_LIBS ${LIBS_DIR}/thirdparty)
 
 # sources
 set(SOURCES
+    src/components/components_base.cpp
     src/components/components_engine.cpp
     src/config/config.cpp
     src/config/logging_config.cpp

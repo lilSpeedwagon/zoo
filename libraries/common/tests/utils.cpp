@@ -28,7 +28,7 @@ TEST_CASE("GetOptional", "[Algo]") {
     CHECK(common::utils::algo::GetOptional(map, "key3") == std::nullopt);
 }
 
-TEST_CASE("GetorDefault", "[Algo]") {
+TEST_CASE("GetOrDefault", "[Algo]") {
     std::unordered_map<std::string, int> map{};
     map["key"] = 1;
     map["key2"] = 2;

@@ -30,7 +30,8 @@ void ComponentsEngine::Init() {
 }
 
 void ComponentsEngine::Register(ComponentPtr component_ptr) {
-    components_[component_ptr->Name()] = component_ptr;
+    auto name = std::string(component_ptr->Name());
+    components_[std::move(name)] = component_ptr;
 }
 
 void ComponentsEngine::Reset() {
