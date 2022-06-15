@@ -6,10 +6,6 @@ set (CMAKE_CXX_STANDARD 17)
 find_package(Threads REQUIRED)
 find_package(Boost COMPONENTS regex REQUIRED)
 
-if(NOT DEFINED ENV{BOOST_INCLUDE_DIRS} AND NOT Boost_FOUND)
-    message(WARNING "Env var BOOST_INCLUDE_DIRS is not declared. Boost lib may be not found.")
-endif()
-
 # libraries headers
 set(LIBS_DIR ../../libraries)
 set(THIRDPARTY_LIBS ${LIBS_DIR}/thirdparty)

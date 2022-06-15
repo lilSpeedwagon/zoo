@@ -1,6 +1,9 @@
 #include "logger.hpp"
 
+#include <string>
 #include <time.h>
+
+#include <common/include/format.hpp>
 
 namespace common::logging {
 
@@ -16,6 +19,9 @@ std::string FormatLogLevel(const LogLevel level) {
             return "WARNING";
         case LogLevel::Error:
             return "ERROR";
+        default:
+            throw std::logic_error(common::format::Format(
+                "Invalid log level {}", static_cast<int>(level)));
     }
 }
 

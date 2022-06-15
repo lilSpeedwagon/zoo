@@ -72,6 +72,22 @@ void PrepareResponse(Response& response, bool keep_alive) {
 
 HttpHandlers::HttpHandlers() : handlers_{} {}
 
+HttpHandlers::HttpHandlers(const HttpHandlers& other) 
+    : handlers_(other.handlers_) {}
+
+HttpHandlers::HttpHandlers(HttpHandlers&& other) 
+    : handlers_(std::move(other.handlers_)) {}
+
+HttpHandlers& HttpHandlers::operator=(const HttpHandlers& other) {
+    handlers_ = other.handlers_;
+    return *this;
+}
+
+HttpHandlers& HttpHandlers::operator=(HttpHandlers&& other) {
+    std::swap(handlers_, other.handlers_);
+    return *this;
+}
+
 HttpHandlers::~HttpHandlers() {}
 
 void HttpHandlers::AddHandler(const std::string& uri,
@@ -108,15 +124,24 @@ HttpServer::HttpServer(std::shared_ptr<boost::asio::io_context> io_context_ptr,
     acceptor_{*io_context_ptr_,
         boost::asio::ip::tcp::endpoint{boost::asio::ip::make_address(address), port}} {}
 
+HttpServer::HttpServer(HttpServer&& other) : acceptor_(std::move(other.acceptor_)) {
+    std::swap(io_context_ptr_, other.io_context_ptr_);
+    std::swap(handlers_, other.handlers_);
+}
+
+HttpServer::~HttpServer() {}
+
+HttpServer& HttpServer::operator=(HttpServer&& other) {
+    std::swap(io_context_ptr_, other.io_context_ptr_);
+    std::swap(acceptor_, other.acceptor_);
+    std::swap(handlers_, other.handlers_);
+    return *this;
+}
+
 void HttpServer::AddListener(const std::string& uri, const Method verb,
                              const HttpHandler& handler) {
     LOG_DEBUG() << "setup handler " << uri;
     handlers_.AddHandler(uri, verb, handler);
-}
-
-HttpHandler& HttpServer::GetListener(
-    const std::string& uri, const Method method) const {
-    handlers_.GetHandler(uri, method);
 }
 
 void HttpServer::Listen() {
