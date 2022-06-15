@@ -69,10 +69,15 @@ void LoggerController::RunControlThread() {
     is_enabled_ = true;
     control_thread_ = std::thread(
         [&enabled = is_enabled_](std::chrono::milliseconds flush_delay) {
-        while (enabled) {
-            auto& logger = LoggerFrontend::GetMainLogger();
-            logger.Flush();
-            std::this_thread::sleep_for(flush_delay);
+        try {
+            while (enabled) {
+                auto& logger = LoggerFrontend::GetMainLogger();
+                logger.Flush();
+                std::this_thread::sleep_for(flush_delay);
+            }
+        } catch (const std::exception& ex) {
+            std::cerr << "exception in log control thread: " << ex.what() << '\n';
+            throw;
         }
     }, settings_.flush_delay);
 }
