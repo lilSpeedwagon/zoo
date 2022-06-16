@@ -1,9 +1,7 @@
 # Build
-FROM ubuntu:latest AS build
+FROM speeedwagon/boost-base:latest AS build
 
-RUN apt update && \
-    apt install build-essential libboost-all-dev cmake -y && \
-    mkdir /usr/api_config_service
+RUN mkdir /usr/api_config_service
 WORKDIR /usr/api_config_service
 
 COPY ./services ./services
