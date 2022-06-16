@@ -23,7 +23,7 @@ jobs:
       run: cmake .
     - name: cmake build
       working-directory: ./
-      run: cmake --build . --target dummy_service
+      run: cmake --build .
     - name: run tests
       working-directory: ./
       run: cmake --build . --target lib_common_tests && ./libraries/common/lib_common_tests
