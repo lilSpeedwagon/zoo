@@ -27,3 +27,9 @@ jobs:
     - name: run unit tests
       working-directory: ./
       run: ./libraries/common/lib_common_tests && ./libraries/http/lib_http_tests
+    - name: build image
+      working-directory: ./
+      run: ./services/api_config/build_docker.sh
+    - name: run pytests
+      working-directory: ./
+      run: ./services/api_config/run_tests.sh
