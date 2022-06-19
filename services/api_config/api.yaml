@@ -48,6 +48,88 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorReponse"
 
+  /api/v1/api-config/update:
+    post:
+      parameters:
+        - name: user
+          description: TODO delete after auth implementation
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+              required:
+                - id
+                - schema
+              properties:
+                id:
+                  type: int
+                schema:
+                  $ref: "#/components/schemas/ApiSchemaInput"
+      responses:
+        "200":
+          description: Config was succesfully updated.
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/ApiSchema"
+        "400":
+          description: Not found.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+
+  /api/v1/api-config/delete:
+    post:
+      parameters:
+        - name: user
+          description: TODO delete after auth implementation
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Config was succesfully deleted.
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/ApiSchema"
+        "400":
+          description: Not found.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+
   /api/v1/api-config/get:
     get:
       parameters:
