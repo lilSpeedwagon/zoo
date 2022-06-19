@@ -17,10 +17,14 @@ set(SOURCES
     main.cpp
     src/components/api_storage.cpp
     src/handlers/create.cpp
+    src/handlers/delete.cpp
     src/handlers/get.cpp
     src/handlers/list.cpp
     src/handlers/ping.cpp
+    src/handlers/update.cpp
     src/models/api_config.cpp
+    src/utils/response.cpp
+    src/utils/request.cpp
 )
 
 # build executable

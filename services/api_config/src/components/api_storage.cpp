@@ -36,26 +36,25 @@ ApiConfigData ApiConfigStorage::Insert(const models::ApiConfig& api) {
     return data;
 }
 
-ApiConfigData ApiConfigStorage::Update(uint64_t id, const models::ApiConfig& api) {
+std::optional<ApiConfigData> ApiConfigStorage::Update(
+    uint64_t id, const models::ApiConfig& api) {
     const auto it = apis_.find(id);
     if (it != apis_.end()) {
         it->second.metadata.updated = std::chrono::system_clock::now();
         it->second.data = api;
         return it->second;
     }
-    throw std::runtime_error(
-        common::format::Format("Config '{}' not found", id));
+    return std::nullopt;
 }
 
-ApiConfigData ApiConfigStorage::Delete(uint64_t id) {
+std::optional<ApiConfigData> ApiConfigStorage::Delete(uint64_t id) {
     const auto it = apis_.find(id);
     if (it != apis_.end()) {
         auto data = it->second;
         apis_.erase(it);
         return data;
     }
-    throw std::runtime_error(
-        common::format::Format("Config '{}' not found", id));
+    return std::nullopt;
 }
 
 std::optional<ApiConfigData> ApiConfigStorage::Get(uint64_t id) const {

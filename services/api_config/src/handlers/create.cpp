@@ -10,6 +10,7 @@
 
 #include <components/api_storage.hpp>
 #include <models/api_config.hpp>
+#include <utils/response.hpp>
 
 namespace api_config::handlers {
 
@@ -19,12 +20,8 @@ http::Response handle_create(http::Request&& request) {
     
     auto storage_ptr = common::components::ComponentsEngine::GetInstance()
         .Get<components::ApiConfigStorage>();
-    std::optional<models::ApiConfigData> inserted = storage_ptr->Insert(config);
-    
-    common::json::json response_json = inserted.value();
-    http::Response response{http::Status::ok, request.version()};
-    response.body() = response_json.dump();
-    return response;
+    auto inserted = storage_ptr->Insert(config);
+    return utils::ToResponse(inserted);
 }
 
 } // namespace api_config::handlers
