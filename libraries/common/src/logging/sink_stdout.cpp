@@ -5,7 +5,7 @@
 namespace common::logging {
 
 void SinkStdout::Write(const std::stringstream& buffer) {
-    std::cout << buffer.str();
+    std::cout << buffer.str() << std::flush;
 }
 
 } // namespace common::logging
