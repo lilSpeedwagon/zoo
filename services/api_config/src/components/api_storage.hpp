@@ -25,8 +25,8 @@ public:
     void Init() override;
 
     models::ApiConfigData Insert(const models::ApiConfig& api);
-    models::ApiConfigData Update(uint64_t id, const models::ApiConfig& api);
-    models::ApiConfigData Delete(uint64_t name);
+    std::optional<models::ApiConfigData> Update(uint64_t id, const models::ApiConfig& api);
+    std::optional<models::ApiConfigData> Delete(uint64_t name);
     std::optional<models::ApiConfigData> Get(uint64_t name) const;
     std::vector<models::ApiConfigData> List() const;
 

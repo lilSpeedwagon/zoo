@@ -1,4 +1,4 @@
-#include "get.hpp"
+#include "delete.hpp"
 
 #include <common/include/components_engine.hpp>
 #include <common/include/json.hpp>
@@ -12,20 +12,19 @@
 
 namespace api_config::handlers {
 
-http::Response handle_get(http::Request&& request) {
-    LOG_INFO() << "/api/v1/api-config/get";
+http::Response handle_delete(http::Request&& request) {
+    LOG_INFO() << "/api/v1/api-config/delete";
     
     const auto id = utils::GetId(request);
-    LOG_INFO() << common::format::Format("get config with id {}", id);
-
     auto storage_ptr = common::components::ComponentsEngine::GetInstance()
         .Get<components::ApiConfigStorage>();
-    auto config_opt = storage_ptr->Get(id);
-    if (!config_opt.has_value()) {
+    auto deleted_opt = storage_ptr->Delete(id);
+    if (!deleted_opt.has_value()) {
         throw http::exceptions::NotFound(
             common::format::Format("API config with id '{}' not found", id).data());
     }
-    return utils::ToResponse(config_opt.value());
+    
+    return utils::ToResponse(deleted_opt.value());
 }
 
 } // namespace api_config::handlers

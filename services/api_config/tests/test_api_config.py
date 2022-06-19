@@ -1,4 +1,3 @@
-from typing import Optional
 
 import pytest
 
@@ -119,3 +118,97 @@ def test_list(api_config):
     }
     assert(response.status_code == 200)
     assert(response.json() == expected_response)
+
+
+def test_delete(api_config):
+    schema={'key': 'value', 'value': 'key'}
+    created = _create_api_config(api_config, name='config',
+                                 description='config description', schema=schema)
+    id = created['id']
+
+    response = api_config.post(f'/api/v1/api-config/delete?id={id}')
+    assert(response.status_code == 200)
+    assert(response.json() == created)
+
+    response = api_config.get(f'/api/v1/api-config/get?id={id}')
+    assert(response.status_code == 404)
+    assert(response.text == f'API config with id \'{id}\' not found')
+
+
+@pytest.mark.parametrize('id', [('-1'), ('abc'), (' ')])
+def test_delete_invalid_id(api_config, id):
+    response = api_config.post(f'/api/v1/api-config/delete?id={id}')
+    assert(response.status_code == 400)
+    assert(response.text == 'Parameter \'id\' is invalid')
+
+
+def test_delete_missing(api_config):
+    response = api_config.post('/api/v1/api-config/delete?id=99')
+    assert(response.status_code == 404)
+    assert(response.text == 'API config with id \'99\' not found')
+
+
+def test_update(api_config):
+    schema={'key': 'value', 'value': 'key'}
+    created = _create_api_config(api_config, name='config',
+                                 description='config description', schema=schema)
+    id = created['id']
+
+    response = api_config.post(
+        '/api/v1/api-config/update',
+        {
+            'id': id,
+            'schema': {
+                'name': 'new name',
+                'description': 'new description',
+                'schema': {'new_key': 'new_value'},
+            },
+        }
+    )
+    expected_config = {
+        'id': created['id'],
+        'created': created['created'],
+        'updated': MockAny(),
+        'author': created['author'],
+        'name': 'new name',
+        'description': 'new description',
+        'schema': {'new_key': 'new_value'},
+    }
+    assert(response.status_code == 200)
+    assert(response.json() == expected_config)
+
+    response = api_config.get(f'/api/v1/api-config/get?id={id}')
+    assert(response.status_code == 200)
+    assert(response.json() == expected_config)
+
+
+def test_update_bad_request(api_config):
+    schema={'key': 'value', 'value': 'key'}
+    created = _create_api_config(api_config, name='config',
+                                 description='config description', schema=schema)
+    id = created['id']
+
+    response = api_config.post(
+        '/api/v1/api-config/update',
+        {
+            'id': id,
+            'schema': {'name': 'new name'},
+        }
+    )
+    assert(response.status_code == 400)
+
+
+def test_update_missing(api_config):
+    response = api_config.post(
+        '/api/v1/api-config/update',
+        {
+            'id': 99,
+            'schema': {
+                'name': 'new name',
+                'schema': {'new_key': 'new_value'},
+            },
+        },
+    )
+    assert(response.status_code == 404)
+    assert(response.text == 'API config with id \'99\' not found')
+
