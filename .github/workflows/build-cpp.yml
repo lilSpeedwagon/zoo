@@ -29,7 +29,7 @@ jobs:
       run: ./libraries/common/lib_common_tests && ./libraries/http/lib_http_tests
     - name: build image
       working-directory: ./
-      run: sudo ./services/api_config/build_docker.sh
+      run: ./services/api_config/build_docker.sh
     - name: run pytests
       working-directory: ./
-      run: sudo ./services/api_config/run_tests.sh
+      run: ./services/api_config/run_tests.sh
