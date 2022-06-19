@@ -18,7 +18,7 @@ def api_config():
         def get(self, path: str) -> requests.Response:
             return requests.get(self.make_uri(path))
 
-        def post(self, path: str, body: dict) -> requests.Response:
+        def post(self, path: str, body: dict = {}) -> requests.Response:
             return requests.post(self.make_uri(path), json=body)
         
     return ApiConfigService()
