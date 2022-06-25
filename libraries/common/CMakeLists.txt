@@ -56,6 +56,7 @@ set(TEST_SOURCES
     tests/format.cpp
     tests/log.cpp
     tests/main.cpp
+    tests/strong_typedef.cpp
     tests/utils.cpp
     ${SOURCES}
 )
