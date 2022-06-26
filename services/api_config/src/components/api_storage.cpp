@@ -11,7 +11,7 @@ using models::Metadata;
 
 } // namespace
 
-ApiConfigStorage::ApiConfigStorage() : id_counter_{0} {}
+ApiConfigStorage::ApiConfigStorage() : id_counter_{0}, apis_() {}
 ApiConfigStorage::~ApiConfigStorage() {}
 
 const char* ApiConfigStorage::Name() const {
@@ -37,7 +37,7 @@ ApiConfigData ApiConfigStorage::Insert(const models::ApiConfig& api) {
 }
 
 std::optional<ApiConfigData> ApiConfigStorage::Update(
-    uint64_t id, const models::ApiConfig& api) {
+    models::ApiConfigId id, const models::ApiConfig& api) {
     const auto it = apis_.find(id);
     if (it != apis_.end()) {
         it->second.metadata.updated = std::chrono::system_clock::now();
@@ -47,7 +47,7 @@ std::optional<ApiConfigData> ApiConfigStorage::Update(
     return std::nullopt;
 }
 
-std::optional<ApiConfigData> ApiConfigStorage::Delete(uint64_t id) {
+std::optional<ApiConfigData> ApiConfigStorage::Delete(models::ApiConfigId id) {
     const auto it = apis_.find(id);
     if (it != apis_.end()) {
         auto data = it->second;
@@ -57,7 +57,7 @@ std::optional<ApiConfigData> ApiConfigStorage::Delete(uint64_t id) {
     return std::nullopt;
 }
 
-std::optional<ApiConfigData> ApiConfigStorage::Get(uint64_t id) const {
+std::optional<ApiConfigData> ApiConfigStorage::Get(models::ApiConfigId id) const {
     if (auto it = apis_.find(id);
         it != apis_.end()) {
         return it->second;
@@ -74,8 +74,8 @@ std::vector<models::ApiConfigData> ApiConfigStorage::List() const {
     return result;
 }
 
-uint64_t ApiConfigStorage::GetNextId() {
-    return id_counter_++;
+models::ApiConfigId ApiConfigStorage::GetNextId() {
+    return models::ApiConfigId(id_counter_++);
 }
 
 } // namespace api_config::components

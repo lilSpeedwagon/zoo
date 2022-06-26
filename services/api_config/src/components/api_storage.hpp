@@ -25,15 +25,16 @@ public:
     void Init() override;
 
     models::ApiConfigData Insert(const models::ApiConfig& api);
-    std::optional<models::ApiConfigData> Update(uint64_t id, const models::ApiConfig& api);
-    std::optional<models::ApiConfigData> Delete(uint64_t name);
-    std::optional<models::ApiConfigData> Get(uint64_t name) const;
+    std::optional<models::ApiConfigData> Update(models::ApiConfigId id,
+                                                const models::ApiConfig& api);
+    std::optional<models::ApiConfigData> Delete(models::ApiConfigId id);
+    std::optional<models::ApiConfigData> Get(models::ApiConfigId id) const;
     std::vector<models::ApiConfigData> List() const;
 
 private:
-    uint64_t GetNextId();
+    models::ApiConfigId GetNextId();
 
-    std::unordered_map<uint64_t, models::ApiConfigData> apis_;
+    std::unordered_map<models::ApiConfigId, models::ApiConfigData> apis_;
     uint64_t id_counter_;
 };
 

@@ -8,7 +8,7 @@
 
 namespace api_config::utils {
 
-uint64_t GetId(const http::Request& request) {
+models::ApiConfigId GetId(const http::Request& request) {
     auto params = http::utils::GetParams(request);
     auto id_opt = common::utils::algo::GetOptional(params, "id");
     if (!id_opt.has_value()) {
@@ -21,7 +21,7 @@ uint64_t GetId(const http::Request& request) {
     }
     
     try {
-        return std::stoul(id_opt.value().data());
+        return models::ApiConfigId(std::stoul(id_opt.value().data()));
     } catch (const std::logic_error& ex) {
         throw http::exceptions::BadRequest("Parameter 'id' is invalid");
     }

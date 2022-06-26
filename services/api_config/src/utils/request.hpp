@@ -2,9 +2,10 @@
 
 #include <http/include/models.hpp>
 
+#include <models/api_config.hpp>
 
 namespace api_config::utils {
 
-uint64_t GetId(const http::Request& request);
+models::ApiConfigId GetId(const http::Request& request);
 
 } // namespace api_config::utils
