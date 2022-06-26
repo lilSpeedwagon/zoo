@@ -1,4 +1,7 @@
 #include <string>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <catch2/catch.hpp>
 
@@ -91,6 +94,14 @@ TEST_CASE("User defined", "[StrongTypedef]") {
     CHECK(id == id2);
     CHECK(id.GetUnderlying() == id_custom);
     CHECK(id.GetUnderlying() == id2.GetUnderlying());
+}
+
+TEST_CASE("Containers", "[StrongTypedef]") {
+    using Id = common::types::StrongTypedef<Custom, struct IdTag>;
+
+    std::vector<Id> vector{};
+    std::unordered_map<Id, Id> map{};
+    std::unordered_set<Id> set{};
 }
 
 } // namespace common::tests::types

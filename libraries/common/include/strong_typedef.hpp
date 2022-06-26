@@ -4,7 +4,6 @@
 
 namespace common::types {
 
-
 /// @class Strong typedef implementation.
 /// @param T - underlying type.
 /// @param Tag - any type to differ typedefs with the same underlying type.
@@ -43,6 +42,9 @@ public:
     bool operator==(const StrongTypedef& other) const {
         return value_ == other.value_;
     }
+    bool operator<(const StrongTypedef& other) const {
+        return value_ < other.value_;
+    }
 
     T& GetUnderlying() noexcept {
         return value_;
@@ -53,3 +55,14 @@ private:
 };
 
 } // namespace common::types
+
+namespace std {
+
+template<typename T, typename Tag>
+struct hash<common::types::StrongTypedef<T, Tag> > {
+    std::size_t operator()(const common::types::StrongTypedef<T, Tag>& t) const {
+        return std::hash<T>(t.GetUnderlying);
+    }
+};
+
+} // namepspace std
