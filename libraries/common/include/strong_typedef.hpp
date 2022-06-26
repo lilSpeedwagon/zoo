@@ -50,6 +50,10 @@ public:
         return value_;
     }
 
+    const T& GetUnderlying() const noexcept {
+        return value_;
+    }
+
 private:
     T value_;
 };
@@ -61,7 +65,7 @@ namespace std {
 template<typename T, typename Tag>
 struct hash<common::types::StrongTypedef<T, Tag> > {
     std::size_t operator()(const common::types::StrongTypedef<T, Tag>& t) const {
-        return std::hash<T>(t.GetUnderlying);
+        return std::hash<T>{}(t.GetUnderlying());
     }
 };
 

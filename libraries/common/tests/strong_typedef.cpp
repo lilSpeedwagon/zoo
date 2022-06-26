@@ -97,11 +97,17 @@ TEST_CASE("User defined", "[StrongTypedef]") {
 }
 
 TEST_CASE("Containers", "[StrongTypedef]") {
-    using Id = common::types::StrongTypedef<Custom, struct IdTag>;
+    using Id = common::types::StrongTypedef<std::string, struct IdTag>;
+    using Value = common::types::StrongTypedef<Custom, struct IdTag>;
 
-    std::vector<Id> vector{};
-    std::unordered_map<Id, Id> map{};
+    std::vector<Value> vector{};
+    vector.push_back(Value{});
+
+    std::unordered_map<Id, Value> map{};
+    map.insert({Id{}, Value{}});
+
     std::unordered_set<Id> set{};
+    set.insert(Id{});
 }
 
 } // namespace common::tests::types
