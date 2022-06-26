@@ -15,11 +15,11 @@ namespace api_config::handlers {
 http::Response handle_update(http::Request&& request) {
     LOG_INFO() << "/api/v1/api-config/update";
 
-    uint64_t id{};
+    models::ApiConfigId id{};
     models::ApiConfig config{};
     try {
         auto data = common::json::json::parse(request.body());
-        id = data.at("id");
+        id = models::ApiConfigId(data.at("id"));
         config = data.get<models::ApiConfig>();
     } catch (const common::json::detail::exception& ex) {
         throw http::exceptions::BadRequest(ex.what());

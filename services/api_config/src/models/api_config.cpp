@@ -15,7 +15,7 @@ void from_json(const common::json::json& data, models::ApiConfig& config) {
 
 void to_json(common::json::json& json, const ApiConfigData& data) {
     json = common::json::json{
-        {"id", data.metadata.id},                                       // id
+        {"id", data.metadata.id.GetUnderlying()},                       // id
         {"author", data.metadata.author},                               // author
         {"created", common::format::ToString(data.metadata.created)},   // created
         {"updated", common::format::ToString(data.metadata.updated)},   // updated

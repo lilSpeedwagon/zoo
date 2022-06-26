@@ -5,8 +5,11 @@
 #include <string>
 
 #include <common/include/json.hpp>
+#include <common/include/strong_typedef.hpp>
 
 namespace api_config::models {
+
+using ApiConfigId = common::types::StrongTypedef<uint64_t, struct IdTag>;
 
 /// @struct Configuration of the single CRUD API
 struct ApiConfig {
@@ -16,7 +19,7 @@ struct ApiConfig {
 };
 
 struct Metadata {
-    uint64_t id{};
+    ApiConfigId id{};
     std::string author{};
     std::chrono::time_point<std::chrono::system_clock> created{};
     std::chrono::time_point<std::chrono::system_clock> updated{};

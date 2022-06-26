@@ -5,6 +5,8 @@
 #include <string>
 #include <sstream>
 
+#include <common/include/strong_typedef.hpp>
+
 namespace common::format {
 
 constexpr std::string_view kDefaultTimeFormat = "%c";
@@ -56,6 +58,11 @@ template<>
 inline std::string ToString<std::chrono::system_clock::time_point>(
     const std::chrono::system_clock::time_point& timepoint) {
     return TimePointToString(timepoint);
+}
+
+template<typename T, typename Tag>
+inline std::string ToString(const types::StrongTypedef<T, Tag>& value) {
+    return ToString(value.GetUnderlying());
 }
 
 namespace impl {

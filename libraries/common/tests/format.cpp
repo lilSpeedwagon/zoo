@@ -4,6 +4,7 @@
 #include <catch2/catch.hpp>
 
 #include <common/include/format.hpp>
+#include <common/include/strong_typedef.hpp>
 
 namespace common::tests::format {
 
@@ -45,6 +46,12 @@ TEST_CASE("ToString", "[Format]") {
         CheckString(ToString(GetDefaultTime()),
                     "Thu Jan  1 00:00:00 1970");
     }
+
+    SECTION("StrongTypedef") {
+        using Custom = types::StrongTypedef<std::string, struct CustomTag>;
+        auto str = Custom(std::string("hello"));
+        CheckString(ToString(str), "hello");
+    }
 }
 
 
@@ -83,6 +90,11 @@ TEST_CASE("Format", "[Format]") {
     SECTION("Substitution (time)") {
         CheckString(Format("{}", GetDefaultTime()),
                     "Thu Jan  1 00:00:00 1970");
+    }
+
+    SECTION("Substitution (strong typedef)") {
+        using Custom = types::StrongTypedef<std::string, struct CustomTag>;
+        CheckString(Format("{}", Custom(std::string("hello"))), "hello");
     }
 
     SECTION("Substitution (mixed)") {
