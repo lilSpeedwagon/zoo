@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-namespace common::components {
+namespace components {
 
 /// @class Base class for the pieces of components system.
 class ComponentBase {
@@ -15,9 +15,16 @@ public:
     ComponentBase();
     virtual ~ComponentBase();
 
+    /// @brief Returns true if component is initialized.
     bool IsReady() const;
-    virtual const char* Name() const = 0;
+
+    /// @brief Override this method to initialize component.
     virtual void Init() = 0;
+
+    /// @brief Override this method to reset component state.
+    virtual void Reset() = 0;
+    
+    virtual const char* Name() const = 0;
 
 protected:
     bool is_ready_;
@@ -25,4 +32,4 @@ protected:
 
 using ComponentPtr = std::shared_ptr<ComponentBase>;
 
-} // namespace common::components
+} // namespace components

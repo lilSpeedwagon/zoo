@@ -2,11 +2,11 @@
 
 #include <unordered_map>
 
-#include <common/include/component_base.hpp>
 #include <common/include/format.hpp>
-#include <common/include/logging.hpp>
 
-namespace common::components {
+#include <components/include/component_base.hpp>
+
+namespace components {
 
 /// @class Global component system 
 /// to access registered components by their's type.
@@ -16,13 +16,16 @@ public:
     static ComponentsEngine& GetInstance();
     ~ComponentsEngine();
 
-    /// @brief Init all of the registered components.
-    void Init();
-
     /// @brief Register a new component.
     void Register(ComponentPtr component_ptr);
 
     /// @brief Remove all of the registered components.
+    void Clear();
+    
+    /// @brief Init all of the registered components.
+    void Init();
+
+    /// @brief Reset all of the registered components.
     void Reset();
 
     /// @brief Get a component of the specified type.
@@ -37,14 +40,22 @@ public:
             return std::dynamic_pointer_cast<T>(it->second);
         }
         throw std::logic_error(
-            format::Format("component '{}' is not registered", name));
+            common::format::Format("component '{}' is not registered", name));
     }
+
+    /// @brief Get a component by name.
+    /// @returns Pointer to the requested component or empty pointer if not found.
+    ComponentPtr Get(const char* name) const;
 
 private:
     ComponentsEngine();
+    ComponentsEngine(const ComponentsEngine&) = delete;
+    ComponentsEngine(ComponentsEngine&&) = delete;
+    ComponentsEngine& operator=(const ComponentsEngine&) = delete;
+    ComponentsEngine& operator=(ComponentsEngine&&) = delete;
 
     bool is_initialized_;
     std::unordered_map<std::string, ComponentPtr> components_;
 };
 
-} // namespace common::components
+} // namespace components
