@@ -54,16 +54,18 @@ Response HttpClient::Request(const http::Request& request) {
     }
 
     LOG_DEBUG() << common::format::Format(
-        "requesting {} {}:{}{}\n{}", http::utils::ToString(request.method()),
+        "Requesting {} {}:{}{}\n{}", http::utils::ToString(request.method()),
         host_, port_, request.target().to_string(), request.body());
 
     auto& context = *context_ptr_;
     auto const resolved_host = ResolveHost(context, host_, port_);
 
+    LOG_TRACE() << common::format::Format("Conntecting to the host {}", host_);
     boost::beast::tcp_stream stream(context);
     stream.connect(resolved_host);
     boost::beast::http::write(stream, request);
 
+    LOG_TRACE() << "Waiting for response...";
     Response result{};
     boost::beast::http::read(stream, buffer_, result);
 

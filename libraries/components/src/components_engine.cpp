@@ -61,6 +61,7 @@ void ComponentsEngine::Reset() {
         LOG_DEBUG() << "Reset component " << component.second->kName;
         component.second->Reset();
     }
+    LOG_INFO() << "Components system was reset";
 }
 
 } // namespace components
