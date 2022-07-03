@@ -26,7 +26,7 @@ jobs:
       run: cmake --build .
     - name: run unit tests
       working-directory: ./
-      run: ./libraries/common/lib_common_tests && ./libraries/http/lib_http_tests
+      run: ./libraries/common/lib_common_tests && ./libraries/http/lib_http_tests && ./libraries/components/lib_components_tests
     - name: build image
       working-directory: ./
       run: ./services/api_config/build_docker.sh
