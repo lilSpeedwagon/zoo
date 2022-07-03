@@ -1,8 +1,8 @@
 #include "get.hpp"
 
-#include <common/include/components_engine.hpp>
 #include <common/include/json.hpp>
 #include <common/include/logging.hpp>
+#include <components/include/components_engine.hpp>
 #include <http/include/exceptions.hpp>
 
 #include <components/api_storage.hpp>
@@ -18,7 +18,7 @@ http::Response handle_get(http::Request&& request) {
     const auto id = utils::GetId(request);
     LOG_INFO() << common::format::Format("get config with id {}", id);
 
-    auto storage_ptr = common::components::ComponentsEngine::GetInstance()
+    auto storage_ptr = ::components::ComponentsEngine::GetInstance()
         .Get<components::ApiConfigStorage>();
     auto config_opt = storage_ptr->Get(id);
     if (!config_opt.has_value()) {

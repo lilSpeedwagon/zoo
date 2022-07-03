@@ -33,6 +33,15 @@ void IoThreadPool::RunInThisThread() {
     context_ptr_->run();
 }
 
+void IoThreadPool::Stop() {
+    if (context_ptr_->stopped()) {
+        return;
+    }
+
+    context_ptr_->stop();
+    Join();
+}
+
 void IoThreadPool::Join() {
     for (auto& thread : pool_) {
         thread.join();

@@ -1,8 +1,8 @@
 #include "update.hpp"
 
-#include <common/include/components_engine.hpp>
 #include <common/include/json.hpp>
 #include <common/include/logging.hpp>
+#include <components/include/components_engine.hpp>
 #include <http/include/exceptions.hpp>
 #include <http/include/utils.hpp>
 
@@ -25,7 +25,7 @@ http::Response handle_update(http::Request&& request) {
         throw http::exceptions::BadRequest(ex.what());
     }
 
-    auto storage_ptr = common::components::ComponentsEngine::GetInstance()
+    auto storage_ptr = ::components::ComponentsEngine::GetInstance()
         .Get<components::ApiConfigStorage>();
     auto updated_opt = storage_ptr->Update(id, config);
     if (!updated_opt.has_value()) {

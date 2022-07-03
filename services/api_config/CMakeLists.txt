@@ -40,6 +40,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # link libs
 target_link_libraries(${PROJECT_NAME} lib_http)
 target_link_libraries(${PROJECT_NAME} lib_common)
+target_link_libraries(${PROJECT_NAME} lib_components)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 target_compile_options(${PROJECT_NAME} PRIVATE

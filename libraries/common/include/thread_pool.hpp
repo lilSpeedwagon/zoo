@@ -4,12 +4,13 @@
 #include <vector>
 
 #include <boost/asio/io_context.hpp>
+#include <boost/core/noncopyable.hpp>
 
 namespace common::threading {
 
 /// @class Threadpool intended for async work
 /// with boost async I/O context.
-class IoThreadPool {
+class IoThreadPool : private boost::noncopyable {
 public:
     IoThreadPool(size_t pool_size = 1);
     ~IoThreadPool();
@@ -18,6 +19,7 @@ public:
     
     void Run();
     void RunInThisThread();
+    void Stop();
     void Join();
     void Detach();
 

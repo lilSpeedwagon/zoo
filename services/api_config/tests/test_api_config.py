@@ -10,8 +10,10 @@ class MockAny:
         return True
 
 
-def _create_api_config(service, name: str, schema: dict = {},
-                       description: str='') -> dict:
+def _create_api_config(
+    service, name: str, schema: dict = {'key': 'value', 'value': 'key'},
+    description: str=''
+) -> dict:
     response = service.post(
         '/api/v1/api-config/create',
         {
@@ -37,13 +39,6 @@ def _create_api_config(service, name: str, schema: dict = {},
     return result
 
 
-def test_list_empty(api_config):
-    response = api_config.get(f'/api/v1/api-config/list')
-    expected_response = {'items': None}
-    assert(response.status_code == 200)
-    assert(response.json() == expected_response)
-
-
 def test_create(api_config):
     schema={'key': 'value', 'value': 'key'}
     _create_api_config(api_config, name='config',
@@ -51,9 +46,8 @@ def test_create(api_config):
 
 
 def test_get(api_config):
-    schema={'key': 'value', 'value': 'key'}
     created = _create_api_config(api_config, name='config',
-                                 description='config description', schema=schema)
+                                 description='config description')
     id = created['id']
 
     response = api_config.get(f'/api/v1/api-config/get?id={id}')
@@ -74,9 +68,9 @@ def test_get(api_config):
 
 
 def test_get_missing(api_config):
-    response = api_config.get('/api/v1/api-config/get?id=10')
+    response = api_config.get('/api/v1/api-config/get?id=0')
     assert(response.status_code == 404)
-    assert(response.text == 'API config with id \'10\' not found')
+    assert(response.text == 'API config with id \'0\' not found')
 
 
 @pytest.mark.parametrize('id', [('-1'), ('abc'), (' ')])
@@ -87,29 +81,47 @@ def test_get_invalid_id(api_config, id):
 
 
 def test_list(api_config):
+    ids = [
+        _create_api_config(api_config, name='config1', description='config1')['id'],
+        _create_api_config(api_config, name='config2', description='config2')['id'],
+        _create_api_config(api_config, name='config3', description='config3')['id'],
+    ]
+
     response = api_config.get(f'/api/v1/api-config/list')
     expected_response = {
         'items': [
             {
-                'name': 'config',
-                'description': 'config description',
+                'name': 'config3',
+                'description': 'config3',
                 'schema': {
                     'key': 'value',
                     'value': 'key',
                 },
-                'id': MockAny(),
+                'id': ids[2],
                 'author': 'author',
                 'created': MockAny(),
                 'updated': MockAny(),
             },
             {
-                'name': 'config',
-                'description': 'config description',
+                'name': 'config2',
+                'description': 'config2',
                 'schema': {
                     'key': 'value',
                     'value': 'key',
                 },
-                'id': MockAny(),
+                'id': ids[1],
+                'author': 'author',
+                'created': MockAny(),
+                'updated': MockAny(),
+            },
+            {
+                'name': 'config1',
+                'description': 'config1',
+                'schema': {
+                    'key': 'value',
+                    'value': 'key',
+                },
+                'id': ids[0],
                 'author': 'author',
                 'created': MockAny(),
                 'updated': MockAny(),
@@ -120,10 +132,16 @@ def test_list(api_config):
     assert(response.json() == expected_response)
 
 
+def test_list_empty(api_config):
+    response = api_config.get(f'/api/v1/api-config/list')
+    expected_response = {'items': None}
+    assert(response.status_code == 200)
+    assert(response.json() == expected_response)
+
+
 def test_delete(api_config):
-    schema={'key': 'value', 'value': 'key'}
     created = _create_api_config(api_config, name='config',
-                                 description='config description', schema=schema)
+                                 description='config description')
     id = created['id']
 
     response = api_config.post(f'/api/v1/api-config/delete?id={id}')
@@ -143,15 +161,14 @@ def test_delete_invalid_id(api_config, id):
 
 
 def test_delete_missing(api_config):
-    response = api_config.post('/api/v1/api-config/delete?id=99')
+    response = api_config.post('/api/v1/api-config/delete?id=0')
     assert(response.status_code == 404)
-    assert(response.text == 'API config with id \'99\' not found')
+    assert(response.text == 'API config with id \'0\' not found')
 
 
 def test_update(api_config):
-    schema={'key': 'value', 'value': 'key'}
     created = _create_api_config(api_config, name='config',
-                                 description='config description', schema=schema)
+                                 description='config description')
     id = created['id']
 
     response = api_config.post(
@@ -183,15 +200,12 @@ def test_update(api_config):
 
 
 def test_update_bad_request(api_config):
-    schema={'key': 'value', 'value': 'key'}
     created = _create_api_config(api_config, name='config',
-                                 description='config description', schema=schema)
-    id = created['id']
-
+                                 description='config description')
     response = api_config.post(
         '/api/v1/api-config/update',
         {
-            'id': id,
+            'id': created['id'],
             'schema': {'name': 'new name'},
         }
     )
@@ -202,7 +216,7 @@ def test_update_missing(api_config):
     response = api_config.post(
         '/api/v1/api-config/update',
         {
-            'id': 99,
+            'id': 0,
             'schema': {
                 'name': 'new name',
                 'schema': {'new_key': 'new_value'},
@@ -210,5 +224,5 @@ def test_update_missing(api_config):
         },
     )
     assert(response.status_code == 404)
-    assert(response.text == 'API config with id \'99\' not found')
+    assert(response.text == 'API config with id \'0\' not found')
 

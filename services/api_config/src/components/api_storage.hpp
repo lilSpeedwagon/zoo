@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include <common/include/component_base.hpp>
+#include <components/include/component_base.hpp>
 
 #include <models/api_config.hpp>
 
@@ -13,7 +13,7 @@
 namespace api_config::components {
 
 class ApiConfigStorage final
-    : public common::components::ComponentBase {
+    : public ::components::ComponentBase {
 public:
     static constexpr const char* kName = "api-config-storage";
 
@@ -23,6 +23,7 @@ public:
     const char* Name() const override;
 
     void Init() override;
+    void Reset() override;
 
     models::ApiConfigData Insert(const models::ApiConfig& api);
     std::optional<models::ApiConfigData> Update(models::ApiConfigId id,

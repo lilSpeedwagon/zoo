@@ -1,9 +1,9 @@
 #include "get.hpp"
 
-#include <common/include/components_engine.hpp>
 #include <common/include/json.hpp>
 #include <common/include/logging.hpp>
 #include <common/include/utils/algo.hpp>
+#include <components/include/components_engine.hpp>
 #include <http/include/exceptions.hpp>
 #include <http/include/utils.hpp>
 
@@ -15,7 +15,7 @@ namespace api_config::handlers {
 http::Response handle_list(http::Request&& request) {
     LOG_INFO() << "/api/v1/api-config/list";
 
-    auto storage_ptr = common::components::ComponentsEngine::GetInstance()
+    auto storage_ptr = ::components::ComponentsEngine::GetInstance()
         .Get<components::ApiConfigStorage>();
     auto api_list = storage_ptr->List();
     
