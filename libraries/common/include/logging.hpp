@@ -14,6 +14,7 @@ namespace common::logging {
 class Logger;
 
 enum class LogLevel {
+    Trace,
     Debug,
     Info,
     Warning,
@@ -71,6 +72,7 @@ private:
 
 /// @brief macros for stream like logging.
 /// Example: LOG_INFO() << "log message";
+#define LOG_TRACE() LOG(common::logging::LogLevel::Trace)
 #define LOG_DEBUG() LOG(common::logging::LogLevel::Debug)
 #define LOG_INFO() LOG(common::logging::LogLevel::Info)
 #define LOG_WARNING() LOG(common::logging::LogLevel::Warning)
@@ -84,7 +86,6 @@ struct LogSettings {
     std::string path = "./";
     std::string file_prefix = "log_";
     size_t msg_max_size = 256;
-    // size_t logrotate_size;
 };
 
 /// @class Logger configurator and flushing thread holder.

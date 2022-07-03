@@ -11,6 +11,8 @@ namespace {
 
 std::string FormatLogLevel(const LogLevel level) {
     switch (level) {
+        case LogLevel::Trace:
+            return "TRACE";
         case LogLevel::Debug:
             return "DEBUG";
         case LogLevel::Info:

@@ -14,7 +14,6 @@ private:
     std::string path_;
     std::string file_prefix_;
     std::string full_path_;
-    //std::fstream stream_;
 };
 
 } // namespace common::logging
