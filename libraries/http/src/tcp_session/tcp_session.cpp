@@ -26,7 +26,7 @@ void TcpSession::Run() {
 }
 
 void TcpSession::AsyncRead() {
-    LOG_DEBUG() << "tcp session wait for async read, timeout="
+    LOG_TRACE() << "TcpSession wait for async read, timeout="
                 << kDefaultOperationTimeout.count();
     request_.clear();
     stream_.expires_after(kDefaultOperationTimeout);
@@ -40,13 +40,13 @@ void TcpSession::AsyncRead() {
 void TcpSession::OnRead(boost::beast::error_code error_code,
                         std::size_t /*bytes_transferred*/) {
     if (error_code == boost::beast::http::error::end_of_stream) {
-        LOG_DEBUG() << "tcp session end of stream";
+        LOG_TRACE() << "TcpSession end of stream";
         Close();
         return;
     }
 
     if (error_code) {
-        LOG_ERROR() << "tcp session read error: " << error_code.message();
+        LOG_ERROR() << "TcpSession read error: " << error_code.message();
         return;
     }
 
@@ -62,11 +62,11 @@ void TcpSession::OnRead(boost::beast::error_code error_code,
 void TcpSession::OnWrite(const bool close, boost::beast::error_code error_code, 
                          std::size_t /*bytes_transferred*/) {
     if (error_code) {
-        LOG_ERROR() << "tcp session write error: " << error_code.message();
+        LOG_ERROR() << "TcpSession write error: " << error_code.message();
     }
 
     if (close) {
-        LOG_DEBUG() << "tcp session eof found on write";
+        LOG_TRACE() << "TcpSession eof found on write";
         Close();
         return;
     }
@@ -75,11 +75,11 @@ void TcpSession::OnWrite(const bool close, boost::beast::error_code error_code,
 }
 
 void TcpSession::Close() {
-    LOG_DEBUG() << "tcp session close";
+    LOG_TRACE() << "TcpSession close()";
     boost::beast::error_code error;
     stream_.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, error);
     if (error) {
-        LOG_ERROR() << "tcp session close error: " << error.message();
+        LOG_ERROR() << "TcpSession closure error: " << error.message();
     }
 }
 

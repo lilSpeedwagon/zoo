@@ -140,7 +140,7 @@ HttpServer& HttpServer::operator=(HttpServer&& other) {
 
 void HttpServer::AddListener(const std::string& uri, const Method verb,
                              const HttpHandler& handler) {
-    LOG_DEBUG() << "setup handler " << uri;
+    LOG_DEBUG() << "Setup handler " << uri;
     handlers_.AddHandler(uri, verb, handler);
 }
 
@@ -199,7 +199,7 @@ Response HttpServer::HandleRequest(Request&& request) {
     } catch (const exceptions::HttpError& error) {
         response = ResponseFromHttpError(version, error);
     } catch (const std::exception& ex) {
-        LOG_ERROR() << format::Format("not handled exception in {} {}: {}",
+        LOG_ERROR() << format::Format("Not handled exception in {} {}: {}",
                                       request.method_string().to_string(),
                                       request.target().to_string(), ex);
         response = ServerErrorResponse(version);
@@ -216,7 +216,7 @@ Response HttpServer::RouteRequest(Request&& request) {
     auto path = GetPath(request);
     auto handler = handlers_.GetHandler(path, method);
     if (!handler.has_value()) {
-        LOG_INFO() << format::Format("handler for {} {} not found",
+        LOG_INFO() << format::Format("Handler for {} {} not found",
                                      request.method_string().to_string(), path);
         return NotFoundResponse(std::move(request));
     }
