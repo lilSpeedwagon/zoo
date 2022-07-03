@@ -1,8 +1,8 @@
 #include "delete.hpp"
 
-#include <common/include/components_engine.hpp>
 #include <common/include/json.hpp>
 #include <common/include/logging.hpp>
+#include <components/include/components_engine.hpp>
 #include <http/include/exceptions.hpp>
 
 #include <components/api_storage.hpp>
@@ -16,7 +16,7 @@ http::Response handle_delete(http::Request&& request) {
     LOG_INFO() << "/api/v1/api-config/delete";
     
     const auto id = utils::GetId(request);
-    auto storage_ptr = common::components::ComponentsEngine::GetInstance()
+    auto storage_ptr = ::components::ComponentsEngine::GetInstance()
         .Get<components::ApiConfigStorage>();
     auto deleted_opt = storage_ptr->Delete(id);
     if (!deleted_opt.has_value()) {

@@ -1,10 +1,11 @@
 #include <iostream>
 
-#include <common/include/components_engine.hpp>
 #include <common/include/config/logging_config.hpp>
 #include <common/include/format.hpp>
 #include <common/include/logging.hpp>
 #include <common/include/thread_pool.hpp>
+#include <components/include/components_controller.hpp>
+#include <components/include/components_engine.hpp>
 #include <http/include/http_server.hpp>
 
 #include <components/api_storage.hpp>
@@ -25,12 +26,16 @@ common::logging::LoggerController InitLogger() {
     return controller;
 }
 
-void InitComponents() {
-    auto& engine = common::components::ComponentsEngine::GetInstance();
+auto InitComponents() {
+    auto& engine =  components::ComponentsEngine::GetInstance();
     auto api_storage_ptr = 
         std::make_shared<api_config::components::ApiConfigStorage>();
     engine.Register(api_storage_ptr);
     engine.Init();
+
+    auto controller_ptr = std::make_shared<components::ComponentsController>();
+    controller_ptr->RunAsync();
+    return controller_ptr;
 }
 
 int main() {
@@ -38,7 +43,8 @@ int main() {
 
     try {
         const auto log_controller = InitLogger();
-        InitComponents();
+        const auto components_controller_ptr = InitComponents();
+
         LOG_INFO() << "Setting up the server...";
         common::threading::IoThreadPool pool(kThreadsCount);
         auto server_ptr = std::make_shared<http::server::HttpServer>(

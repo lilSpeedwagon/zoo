@@ -1,6 +1,7 @@
 #include "api_storage.hpp"
 
 #include <common/include/format.hpp>
+#include <common/include/logging.hpp>
 
 namespace api_config::components {
 
@@ -19,6 +20,10 @@ const char* ApiConfigStorage::Name() const {
 }
 
 void ApiConfigStorage::Init() {}
+
+void ApiConfigStorage::Reset() {
+    apis_.clear();
+}
 
 ApiConfigData ApiConfigStorage::Insert(const models::ApiConfig& api) {
     const auto now = std::chrono::system_clock::now();
