@@ -16,9 +16,9 @@ fi
 cd services/${service}
 python3 -m pytest -vv
 test_result=$?
-if (test $test_result != 0)
+if (test ${test_result} != 0)
 then
     docker logs ${container_id}
 fi
 docker stop ${container_id} &
-exit test_result
+exit ${test_result}
