@@ -1,5 +1,4 @@
 #! /bin/bash
-# run from repo root
 service=$1
 if [ -z ${service}]
 then

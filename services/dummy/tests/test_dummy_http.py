@@ -55,18 +55,3 @@ def test_post_bad_request(json):
     result = requests.post(f'{HOST_}/post', json=json)
     assert(result.status_code == 400)
     assert(result.text == 'Bad request')
-
-
-
-# TODO
-# get with unused params
-# get with bad param 400
-# post
-# post with body
-# post with bad body
-# not found with wrong method
-# 
-# check headers, version etc. ???????
-
-
-
