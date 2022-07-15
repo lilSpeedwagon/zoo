@@ -7,3 +7,4 @@ then
 fi
 
 docker build -f ./services/${service}/Dockerfile -t ${service}_service .
+exit $?
