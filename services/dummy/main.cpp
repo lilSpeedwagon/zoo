@@ -14,6 +14,7 @@
 
 #include <handlers/get.hpp>
 #include <handlers/ping.hpp>
+#include <handlers/post.hpp>
 
 static constexpr const char* kAddress = "127.0.0.1";
 static const unsigned short kPort = 1111;
@@ -39,7 +40,10 @@ int main() {
         auto server_ptr = std::make_shared<http::server::HttpServer>(
             io_context_ptr, http::consts::kLocalhost, kPort);
         server_ptr->AddListener("/get", http::Method::get, &dummy::handlers::handle_get);
+        server_ptr->AddListener("/get_parametrized", http::Method::get,
+                                &dummy::handlers::handle_get_parametrized);
         server_ptr->AddListener("/ping", http::Method::get, &dummy::handlers::handle_ping);
+        server_ptr->AddListener("/post", http::Method::post, &dummy::handlers::handle_post);
         server_ptr->Listen();
 
         io_context_ptr->run();

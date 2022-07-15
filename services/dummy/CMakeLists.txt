@@ -17,6 +17,7 @@ set(SOURCES
     main.cpp
     src/handlers/get.cpp
     src/handlers/ping.cpp
+    src/handlers/post.cpp
 )
 
 # build executable
