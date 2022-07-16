@@ -9,24 +9,31 @@ Most of them are efficient and easy-to-use, and there is no need in an another "
 But I would like to implement some of these basic tools by myself for better understanding of "guts" of the modern web frameworks.
 So it is a C++ pet project intended for the implementation of the basic web service, tools and environment from scratch (or almost from scratch).
 
-## Roadmap
-- async HTTP server :white_check_mark:
+Target web service is a simple CRUD API generator. As a service user I can define API schema and data model. Described CRUD API with the simple database will be automatically deployed.
+
+## Framework core roadmap
+- async HTTP server and client :white_check_mark:
 - logger :white_check_mark:
 - static configs :white_check_mark:
-- HTTP client :white_check_mark:
 - global components system :white_check_mark:
 - test system :white_check_mark:
 - key-value database
 - deploy system
 - caches
 - log storage service
-- log storage UI
-- metrics storage
-- metrics storage UI
+- metrics storage service
 - document database
 - dynamic configs service
 - auth service
+- API gateway
 - TBD
+
+## CRUD API service roadmap
+- API configs service
+- CRUD API provider
+- statistics service
+- auth service
+- API gateway
 
 ## Stack
 - C++17
@@ -47,3 +54,6 @@ So it is a C++ pet project intended for the implementation of the basic web serv
     * CMake tools
     * Python
     * Catch2 and Google Test Explorer
+
+## Services
+The project is divided into microservices and libs. You can find them in corresponding directories. To build, debug and run unit-tests open CMake project in root directory. To build docker container with service use `./build_docker <service_name>`. Acceptance tests (based on pytest) may be runned via `./run_tests <service_name>` (corresponding docker image must be built before).
