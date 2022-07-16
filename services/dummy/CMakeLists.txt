@@ -10,9 +10,15 @@ find_package(Boost REQUIRED)
 set(LIBS_DIR ../../libraries)
 
 # headers
+set(HEADERS_DIR ./src)
 
 # sources
-set(SOURCES main.cpp)
+set(SOURCES
+    main.cpp
+    src/handlers/get.cpp
+    src/handlers/ping.cpp
+    src/handlers/post.cpp
+)
 
 # build executable
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -21,6 +27,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${BOOST_INCLUDE_DIRS}
     ${LIBS_DIR}
+    ${HEADERS_DIR}
 )
 
 # link libs
@@ -29,7 +36,6 @@ target_link_libraries(${PROJECT_NAME} lib_common)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    -pthread
     -pthread
     -DBOOST_DATE_TIME_NO_LIB
     -DBOOST_CHRONO_HEADER_ONLY

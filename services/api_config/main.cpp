@@ -6,6 +6,7 @@
 #include <common/include/thread_pool.hpp>
 #include <components/include/components_controller.hpp>
 #include <components/include/components_engine.hpp>
+#include <http/include/consts.hpp>
 #include <http/include/http_server.hpp>
 
 #include <components/api_storage.hpp>
@@ -16,7 +17,6 @@
 #include <handlers/ping.hpp>
 #include <handlers/update.hpp>
 
-static constexpr const char* kAddress = "127.0.0.1";
 static constexpr unsigned short kPort = 80;
 
 common::logging::LoggerController InitLogger() {
@@ -48,7 +48,7 @@ int main() {
         LOG_INFO() << "Setting up the server...";
         common::threading::IoThreadPool pool(kThreadsCount);
         auto server_ptr = std::make_shared<http::server::HttpServer>(
-            pool.GetContextPtr(), kAddress, kPort);
+            pool.GetContextPtr(), http::consts::kLocalhost, kPort);
         server_ptr->AddListener("/ping", http::Method::get,
                                 &api_config::handlers::handle_ping);
         server_ptr->AddListener("/api/v1/api-config/create", http::Method::post,

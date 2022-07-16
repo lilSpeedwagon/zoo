@@ -18,7 +18,7 @@ namespace format = common::format;
 using ErrorCode = boost::beast::error_code;
 
 constexpr boost::string_view kServerVersion = "SelfMadeZoo Http 0.1";
-constexpr boost::string_view kContentText = "text/html";
+constexpr boost::string_view kContentText = "application/json";
 
 /// @brief returns request path without params
 std::string GetPath(const Request& request) {
