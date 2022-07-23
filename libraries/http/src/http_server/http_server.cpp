@@ -5,6 +5,7 @@
 #include <common/include/logging.hpp>
 #include <common/include/format.hpp>
 
+#include <consts.hpp>
 #include <exceptions.hpp>
 #include <tcp_session/tcp_session.hpp>
 
@@ -64,6 +65,7 @@ Response ResponseFromHttpError(unsigned int version,
 void PrepareResponse(Response& response, bool keep_alive) {
     response.set(boost_http::field::server, kServerVersion);
     response.set(boost_http::field::content_type, kContentText);
+    response.version(consts::kVersion);
     response.keep_alive(keep_alive);
     response.prepare_payload();
 }

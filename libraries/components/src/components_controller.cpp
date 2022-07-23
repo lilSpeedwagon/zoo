@@ -35,7 +35,7 @@ http::Response HandleReset(http::Request&& request) {
         if (component_ptr != nullptr) {
             component_ptr->Reset();
         } else {
-            throw http::exceptions::BadRequest(
+            throw http::exceptions::NotFound(
                 common::format::Format("Component \'{}\' not found", name).c_str());
         }
     } else {

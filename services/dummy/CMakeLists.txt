@@ -15,6 +15,10 @@ set(HEADERS_DIR ./src)
 # sources
 set(SOURCES
     main.cpp
+    src/components/counter.cpp
+    src/components/dict.cpp
+    src/handlers/dict.cpp
+    src/handlers/count.cpp
     src/handlers/get.cpp
     src/handlers/ping.cpp
     src/handlers/post.cpp
@@ -33,6 +37,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # link libs
 target_link_libraries(${PROJECT_NAME} lib_http)
 target_link_libraries(${PROJECT_NAME} lib_common)
+target_link_libraries(${PROJECT_NAME} lib_components)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 target_compile_options(${PROJECT_NAME} PRIVATE

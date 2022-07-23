@@ -2,6 +2,8 @@
 
 #include <unordered_map>
 
+#include <boost/core/noncopyable.hpp>
+
 #include <common/include/format.hpp>
 
 #include <components/include/component_base.hpp>
@@ -11,7 +13,7 @@ namespace components {
 /// @class Global component system 
 /// to access registered components by their's type.
 /// Note: there can be only one component of each type.
-class ComponentsEngine {
+class ComponentsEngine : private boost::noncopyable {
 public:
     static ComponentsEngine& GetInstance();
     ~ComponentsEngine();
@@ -49,10 +51,6 @@ public:
 
 private:
     ComponentsEngine();
-    ComponentsEngine(const ComponentsEngine&) = delete;
-    ComponentsEngine(ComponentsEngine&&) = delete;
-    ComponentsEngine& operator=(const ComponentsEngine&) = delete;
-    ComponentsEngine& operator=(ComponentsEngine&&) = delete;
 
     bool is_initialized_;
     std::unordered_map<std::string, ComponentPtr> components_;
