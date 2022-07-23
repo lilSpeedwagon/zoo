@@ -27,7 +27,7 @@ common::logging::LoggerController InitLogger() {
 }
 
 auto InitComponents() {
-    auto& engine =  components::ComponentsEngine::GetInstance();
+    auto& engine = components::ComponentsEngine::GetInstance();
     auto api_storage_ptr = 
         std::make_shared<api_config::components::ApiConfigStorage>();
     engine.Register(api_storage_ptr);
@@ -64,7 +64,7 @@ int main() {
         server_ptr->Listen();
         pool.RunInThisThread();
     } catch (const std::exception& ex) {
-        std::cerr << common::format::ToString(ex);
+        std::cerr << ex.what() << std::endl;
         return 1;
     }
 

@@ -7,11 +7,6 @@
 
 namespace components {
 
-namespace {
-
-
-} // namespace
-
 ComponentsEngine::ComponentsEngine() : is_initialized_{false}, components_{} {}
 
 ComponentsEngine::~ComponentsEngine() {}
