@@ -11,6 +11,7 @@ set(THIRDPARTY_LIBS ${LIBS_DIR}/thirdparty)
 
 # sources
 set(SOURCES 
+    ./src/default_handlers/ping.cpp
     ./src/http_server/http_server.cpp
     ./src/http_client/http_client.cpp
     ./src/tcp_session/tcp_session.cpp
