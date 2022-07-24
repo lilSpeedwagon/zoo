@@ -20,7 +20,6 @@ set(SOURCES
     src/handlers/delete.cpp
     src/handlers/get.cpp
     src/handlers/list.cpp
-    src/handlers/ping.cpp
     src/handlers/update.cpp
     src/models/api_config.cpp
     src/utils/response.cpp
@@ -44,7 +43,6 @@ target_link_libraries(${PROJECT_NAME} lib_components)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    -pthread
     -pthread
     -DBOOST_DATE_TIME_NO_LIB
     -DBOOST_CHRONO_HEADER_ONLY

@@ -20,7 +20,6 @@ set(SOURCES
     src/handlers/dict.cpp
     src/handlers/count.cpp
     src/handlers/get.cpp
-    src/handlers/ping.cpp
     src/handlers/post.cpp
 )
 

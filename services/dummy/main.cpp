@@ -8,6 +8,7 @@
 #include <components/include/components_controller.hpp>
 #include <components/include/components_engine.hpp>
 #include <http/include/consts.hpp>
+#include <http/include/default_handlers.hpp>
 #include <http/include/http_server.hpp>
 #include <http/include/models.hpp>
 
@@ -16,7 +17,6 @@
 #include <handlers/count.hpp>
 #include <handlers/dict.hpp>
 #include <handlers/get.hpp>
-#include <handlers/ping.hpp>
 #include <handlers/post.hpp>
 
 static const unsigned short kPort = 1111;
@@ -65,9 +65,9 @@ int main() {
         server_ptr->AddListener("/get", http::Method::get, &dummy::handlers::handle_get);
         server_ptr->AddListener("/get_parametrized", http::Method::get,
                                 &dummy::handlers::handle_get_parametrized);
-        server_ptr->AddListener("/ping", http::Method::get, &dummy::handlers::handle_ping);
         server_ptr->AddListener("/post", http::Method::post, &dummy::handlers::handle_post);
         
+        server_ptr->AddListener("/ping", http::Method::get, &http::handlers::handle_ping);
         server_ptr->Listen();
 
         io_context_ptr->run();

@@ -7,6 +7,7 @@
 #include <components/include/components_controller.hpp>
 #include <components/include/components_engine.hpp>
 #include <http/include/consts.hpp>
+#include <http/include/default_handlers.hpp>
 #include <http/include/http_server.hpp>
 
 #include <components/api_storage.hpp>
@@ -14,7 +15,6 @@
 #include <handlers/delete.hpp>
 #include <handlers/get.hpp>
 #include <handlers/list.hpp>
-#include <handlers/ping.hpp>
 #include <handlers/update.hpp>
 
 static constexpr unsigned short kPort = 80;
@@ -50,7 +50,7 @@ int main() {
         auto server_ptr = std::make_shared<http::server::HttpServer>(
             pool.GetContextPtr(), http::consts::kLocalhost, kPort);
         server_ptr->AddListener("/ping", http::Method::get,
-                                &api_config::handlers::handle_ping);
+                                &http::handlers::handle_ping);
         server_ptr->AddListener("/api/v1/api-config/create", http::Method::post,
                                 &api_config::handlers::handle_create);
         server_ptr->AddListener("/api/v1/api-config/delete", http::Method::post,
