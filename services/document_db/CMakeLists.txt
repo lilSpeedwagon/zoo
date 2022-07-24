@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(api_config_service)
+project(document_db_service)
 set (CMAKE_CXX_STANDARD 17)
 
 find_package(Threads REQUIRED)
@@ -15,15 +15,6 @@ set(HEADERS_DIR ./src)
 # sources
 set(SOURCES 
     main.cpp
-    src/components/api_storage.cpp
-    src/handlers/create.cpp
-    src/handlers/delete.cpp
-    src/handlers/get.cpp
-    src/handlers/list.cpp
-    src/handlers/update.cpp
-    src/models/api_config.cpp
-    src/utils/response.cpp
-    src/utils/request.cpp
 )
 
 # build executable
@@ -40,7 +31,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} lib_http)
 target_link_libraries(${PROJECT_NAME} lib_common)
 target_link_libraries(${PROJECT_NAME} lib_components)
-target_link_libraries(${PROJECT_NAME} Threads::Threads)
+# target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
     -pthread
