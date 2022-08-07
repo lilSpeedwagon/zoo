@@ -9,6 +9,8 @@
 #include <http/include/default_handlers.hpp>
 #include <http/include/http_server.hpp>
 
+#include <components/storage.hpp>
+
 static constexpr unsigned short kPort = 5555;
 
 common::logging::LoggerController InitLogger() {
@@ -19,8 +21,9 @@ common::logging::LoggerController InitLogger() {
 }
 
 auto InitComponents() {
+    auto storage_ptr = std::make_shared<documents::components::Storage>();
     auto& engine = components::ComponentsEngine::GetInstance();
-    // TODO register components here
+    engine.Register(storage_ptr);
     engine.Init();
 
     auto controller_ptr = std::make_shared<components::ComponentsController>();

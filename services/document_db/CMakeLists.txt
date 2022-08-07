@@ -13,7 +13,8 @@ set(LIBS_DIR ../../libraries)
 set(HEADERS_DIR ./src)
 
 # sources
-set(SOURCES 
+set(SOURCES
+    src/components/storage.cpp
     main.cpp
 )
 
