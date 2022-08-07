@@ -1,0 +1,229 @@
+openapi: "3.0.0"
+info:
+  description: "Database for documents"
+  version: "1.0.0"
+  title: "Document database"
+paths:
+  /ping:
+    get:
+      responses:
+        "200":
+          description: Server is up.
+        "500":
+          description: Something is wrong.
+
+  /api/v1/create:
+    post:
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+              required:
+                - name
+                - payload
+              properties:
+                name:
+                  type: string
+                owner:
+                  type: string
+                payload:
+                  type: string
+                namespace:
+                  type: string
+      responses:
+        "200":
+          description: Document was succesfully created.
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/Document"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+
+  /api/v1/update:
+    post:
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: int
+                name:
+                  type: string
+                owner:
+                  type: string
+                payload:
+                  type: string
+                namespace:
+                  type: string
+      responses:
+        "200":
+          description: Document was succesfully updated.
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/Document"
+        "400":
+          description: Not found.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+
+  /api/v1/delete:
+    post:
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: int
+      responses:
+        "200":
+          description: Document was succesfully deleted.
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/Document"
+        "400":
+          description: Not found.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+
+  /api/v1/get:
+    get:
+      parameters:
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  schema:
+                    $ref: "#/components/schemas/Document"
+        "400":
+          description: Not found.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+
+  /api/v1/list:
+    get:
+      responses:
+        "200":
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    schema:
+                      $ref: "#/components/schemas/Document"
+        "400":
+          description: Not found.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+        "404":
+          description: Bad request.
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/ErrorReponse"
+
+  /api/v1/namespaces/create:
+
+  /api/v1/namespaces/get:
+
+  /api/v1/namespaces/list:
+
+  /api/v1/namespaces/delete:
+
+components:
+  schemas:
+    ErrorReponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          
+    Document:
+      type: object
+      required:
+        - id
+        - payload
+      properties:
+        id:
+          type: int
+        name:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+        owner:
+          type: string
+        payload:
+          type: string
+        namespace:
+          type: string
+
+  
