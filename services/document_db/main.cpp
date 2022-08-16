@@ -9,7 +9,21 @@
 #include <http/include/default_handlers.hpp>
 #include <http/include/http_server.hpp>
 
+#include <components/storage.hpp>
+#include <handlers/create.hpp>
+#include <handlers/delete.hpp>
+#include <handlers/get.hpp>
+#include <handlers/list.hpp>
+#include <handlers/update.hpp>
+
+namespace {
+
 static constexpr unsigned short kPort = 5555;
+
+inline std::string MakePath(const char* method) {
+    static constexpr const char* kApiPrefix = "/api/v1/documents/{}";
+    return common::format::Format(kApiPrefix, method);
+}
 
 common::logging::LoggerController InitLogger() {
     auto log_config = common::config::GetLogConfig();
@@ -19,8 +33,9 @@ common::logging::LoggerController InitLogger() {
 }
 
 auto InitComponents() {
+    auto storage_ptr = std::make_shared<documents::components::Storage>();
     auto& engine = components::ComponentsEngine::GetInstance();
-    // TODO register components here
+    engine.Register(storage_ptr);
     engine.Init();
 
     auto controller_ptr = std::make_shared<components::ComponentsController>();
@@ -28,8 +43,10 @@ auto InitComponents() {
     return controller_ptr;
 }
 
+} // namespace
+
 int main() {
-    const size_t kThreadsCount = 1;
+    const size_t kThreadsCount = 4;
 
     try {
         const auto log_controller = InitLogger();
@@ -40,7 +57,11 @@ int main() {
         auto server_ptr = std::make_shared<http::server::HttpServer>(
             pool.GetContextPtr(), http::consts::kLocalhost, kPort);
         server_ptr->AddListener("/ping", http::Method::get, &http::handlers::handle_ping);
-        // TODO register handlers here
+        server_ptr->AddListener(MakePath("create"), http::Method::post, &documents::handlers::handle_create);
+        server_ptr->AddListener(MakePath("delete"), http::Method::post, &documents::handlers::handle_delete);
+        server_ptr->AddListener(MakePath("get"), http::Method::get, &documents::handlers::handle_get);
+        server_ptr->AddListener(MakePath("list"), http::Method::get, &documents::handlers::handle_list);
+        server_ptr->AddListener(MakePath("update"), http::Method::post, &documents::handlers::handle_update);
 
         server_ptr->Listen();
         pool.RunInThisThread();
