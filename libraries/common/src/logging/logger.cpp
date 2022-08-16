@@ -28,7 +28,7 @@ std::string FormatLogLevel(const LogLevel level) {
 }
 
 std::string FormatLog(LogMsg&& msg, size_t limit) {
-    constexpr std::string_view kTimeFormat = "%F %T";
+    constexpr std::string_view kTimeFormat = "%FT%TZ";
 
     std::stringstream ss{};
     ss << FormatLogLevel(msg.level);

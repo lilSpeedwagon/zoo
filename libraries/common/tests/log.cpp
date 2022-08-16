@@ -16,7 +16,7 @@ namespace {
 static constexpr std::string_view kTimePlaceholder = "time";
 
 void CheckSink(std::shared_ptr<common::logging::SinkString> sink_ptr, const char* expected) {
-    static const boost::regex kTimeRegex("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
+    static const boost::regex kTimeRegex("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z");
     auto data = sink_ptr->GetString();
     data = boost::regex_replace(data, kTimeRegex, kTimePlaceholder, boost::match_default | boost::format_sed);
     CHECK(data == std::string(expected));
