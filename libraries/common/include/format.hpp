@@ -9,7 +9,7 @@
 
 namespace common::format {
 
-constexpr std::string_view kDefaultTimeFormat = "%c";
+constexpr std::string_view kDefaultTimeFormat = "%FT%T%z"; // ISO-8601 with timezone
 constexpr std::string_view kPlaceholder = "{}";
 
 /// @brief Converts timepoint to a string representation according
