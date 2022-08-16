@@ -3,8 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(document_db_service)
 set (CMAKE_CXX_STANDARD 17)
 
-find_package(Threads REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS thread REQUIRED)
 
 # setup libraries headers
 set(LIBS_DIR ../../libraries)
@@ -15,6 +14,14 @@ set(HEADERS_DIR ./src)
 # sources
 set(SOURCES
     src/components/storage.cpp
+    src/handlers/create.cpp
+    src/handlers/update.cpp
+    src/handlers/delete.cpp
+    src/handlers/get.cpp
+    src/handlers/list.cpp
+    src/models/document.cpp
+    src/utils/response.cpp
+    src/utils/request.cpp
     main.cpp
 )
 
@@ -32,7 +39,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} lib_http)
 target_link_libraries(${PROJECT_NAME} lib_common)
 target_link_libraries(${PROJECT_NAME} lib_components)
-# target_link_libraries(${PROJECT_NAME} Threads::Threads)
+target_link_libraries(${PROJECT_NAME} Boost::thread)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
     -pthread
