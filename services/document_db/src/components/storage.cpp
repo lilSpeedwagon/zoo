@@ -9,7 +9,7 @@ namespace documents::components {
 namespace {
 
 auto FindDocumentInfo(
-    const std::unordered_map<models::DocumentId, models::DocumentPtr>& storage,
+    const std::unordered_map<models::DocumentId, models::DocumentInfoPtr>& storage,
     models::DocumentId id) {
     if (const auto it = storage.find(id);
         it != storage.end()) {
@@ -43,84 +43,104 @@ Storage::~Storage() {}
 void Storage::Init() {}
 
 void Storage::Reset() {
-    std::lock_guard lock(data_access_mutex_);
+    boost::lock_guard lock(data_access_mutex_);
     documents_info_.clear();
     payload_cache_.clear();
 }
 
 const char* Storage::Name() const { return kName; };
 
-documents::models::DocumentPtr Storage::Get(models::DocumentId id, bool fetch_payload) {
-    std::shared_lock lock(data_access_mutex_);
+documents::models::Document Storage::Get(models::DocumentId id, bool fetch_payload) {
+    boost::shared_lock lock(data_access_mutex_);
     const auto info_it = FindDocumentInfo(documents_info_, id);
-    auto result_ptr = std::make_shared<models::Document>(*info_it->second);
+    models::Document result{};
+    result.info = *info_it->second;
     if (fetch_payload) {
         const auto payload_it = FindDocumentPayload(payload_cache_, id);
-        result_ptr->payload_ptr = payload_it->second;
-    }
-    return result_ptr;
-}
-
-std::vector<models::DocumentPtr> Storage::List() {
-    std::vector<models::DocumentPtr> result{};
-    result.reserve(documents_info_.size());
-    std::shared_lock lock(data_access_mutex_);
-    for (const auto& [_, document_ptr] : documents_info_) {
-        result.push_back(document_ptr);
+        result.payload = *payload_it->second;
     }
     return result;
 }
 
-models::DocumentPtr Storage::Add(models::DocumentInput&& input) {
-    const auto id = models::DocumentId{
-        id_counter_.fetch_add(1, std::memory_order::memory_order_relaxed)};    
-    auto created = std::chrono::system_clock::now();
-    auto updated = std::chrono::system_clock::now();
+std::vector<models::Document> Storage::List() {
+    std::vector<models::Document> result{};
+    result.reserve(documents_info_.size());
+    boost::shared_lock lock(data_access_mutex_);
+    for (const auto& [_, info_ptr] : documents_info_) {
+        result.push_back(
+            models::Document{
+                *info_ptr,      // info
+                std::nullopt,   // payload
+            });
+    }
+    return result;
+}
 
-    models::Document document{
+models::Document Storage::Add(models::DocumentInput&& input) {  
+    const auto id = NextId();
+    auto created = std::chrono::system_clock::now();
+    auto updated = created;
+
+    models::DocumentInfo info{
         id,                               // id
         std::move(created),               // created
         std::move(updated),               // updated
         std::move(input.name),            // name
         std::move(input.owner),           // owner
         std::move(input.namespace_name),  // namespace_name
-        nullptr,                          // payload_ptr
     };
-    auto document_ptr = std::make_shared<models::Document>(std::move(document));
     
-    std::lock_guard lock(data_access_mutex_);
-    documents_info_[id] = document_ptr;
-    payload_cache_[id] = std::make_shared<models::DocumentPayload>(input.payload);
-    return document_ptr;
+    boost::lock_guard lock(data_access_mutex_);
+    documents_info_[id] = std::make_shared<models::DocumentInfo>(info);
+    payload_cache_[id] = 
+        std::make_shared<models::DocumentPayload>(std::move(input.payload));
+    return models::Document{
+        info,          // info
+        std::nullopt,  // payload
+    };
 }
 
-models::DocumentPtr Storage::Update(models::DocumentId id,
-                                    models::DocumentUpdateInput&& input) {
-    std::lock_guard lock(data_access_mutex_);
+models::Document Storage::Update(models::DocumentId id,
+                                 models::DocumentUpdateInput&& input) {
+    boost::upgrade_lock read_lock(data_access_mutex_);
     const auto info_it = FindDocumentInfo(documents_info_, id);
-    auto& document = *info_it->second;
-    document.name = std::move(input.name);
-    document.namespace_name = std::move(input.namespace_name);
-    document.updated = std::chrono::system_clock::now();
-
-    models::DocumentPtr result_ptr = std::make_shared<models::Document>(document);
-    if (input.payload.has_value()) {
-        const auto payload_it = FindDocumentPayload(payload_cache_, id);
-        *payload_it->second = input.payload.value();
-        result_ptr->payload_ptr = payload_it->second;
+    auto& info = *info_it->second;
+    if (input.name.has_value() || input.namespace_name.has_value() ||
+        input.payload.has_value()) {
+        boost::upgrade_to_unique_lock write_lock(read_lock);
+        if (input.name.has_value()) {
+            info.name = std::move(input.name.value());
+        }
+        if (input.namespace_name.has_value()) {
+            info.namespace_name = std::move(input.namespace_name.value());
+        }
+        if (input.payload.has_value()) {
+            const auto payload_it = FindDocumentPayload(payload_cache_, id);
+            *payload_it->second = std::move(input.payload.value());
+        }
+        info.updated = std::chrono::system_clock::now();
     }
-    return result_ptr;
+    return models::Document {
+        info,           // info
+        std::nullopt,   // payload
+    };
 }
 
-documents::models::DocumentPtr Storage::Delete(models::DocumentId id) {
-    std::lock_guard lock(data_access_mutex_);
+models::Document Storage::Delete(models::DocumentId id) {
+    boost::lock_guard lock(data_access_mutex_);
     const auto info_it = FindDocumentInfo(documents_info_, id);
     const auto payload_it = FindDocumentPayload(payload_cache_, id);
-    auto result_ptr = info_it->second;
-    result_ptr->payload_ptr = payload_it->second;
+    models::Document result{
+        std::move(*info_it->second), // info
+        std::nullopt,               // payload
+    };
     documents_info_.erase(info_it);
     payload_cache_.erase(payload_it);
-    return result_ptr;
+    return result;
+}
+
+models::DocumentId Storage::NextId() {
+    return models::DocumentId{id_counter_.fetch_add(1, std::memory_order::memory_order_relaxed)};  
 }
 
 } // namespace documents::components

@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include <boost/noncopyable.hpp>
+#include <boost/thread.hpp>
 
 #include <components/include/component_base.hpp>
 
@@ -25,18 +26,20 @@ public:
     void Reset() override;
     const char* Name() const override;
 
-    documents::models::DocumentPtr Get(models::DocumentId id, bool fetch_payload = false);
-    std::vector<models::DocumentPtr> List();
-    models::DocumentPtr Add(models::DocumentInput&& input);
-    models::DocumentPtr Update(models::DocumentId id, models::DocumentUpdateInput&& input);
-    documents::models::DocumentPtr Delete(models::DocumentId id);
+    documents::models::Document Get(models::DocumentId id, bool fetch_payload = false);
+    std::vector<models::Document> List();
+    models::Document Add(models::DocumentInput&& input);
+    models::Document Update(models::DocumentId id, models::DocumentUpdateInput&& input);
+    documents::models::Document Delete(models::DocumentId id);
 
 private:
+    models::DocumentId NextId();
     models::DocumentPayloadPtr FetchPayload(models::DocumentId id);
     
+    // shared mutex implements multiple readers, single writer concept
+    boost::upgrade_mutex data_access_mutex_;
     std::atomic<size_t> id_counter_;
-    std::shared_mutex data_access_mutex_;
-    std::unordered_map<models::DocumentId, models::DocumentPtr> documents_info_;
+    std::unordered_map<models::DocumentId, models::DocumentInfoPtr> documents_info_;
     std::unordered_map<models::DocumentId, models::DocumentPayloadPtr> payload_cache_;
 };
 

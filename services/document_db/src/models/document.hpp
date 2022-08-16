@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 
+#include <common/include/json.hpp>
 #include <common/include/strong_typedef.hpp>
 
 #include <models/namespace.hpp>
@@ -17,16 +18,6 @@ using DocumentPayload =
     common::types::StrongTypedef<std::string, struct DocumentPayloadTag>;
 using DocumentPayloadPtr = std::shared_ptr<DocumentPayload>;
 
-struct Document {
-    DocumentId id{};
-    std::chrono::time_point<std::chrono::system_clock> created{};
-    std::chrono::time_point<std::chrono::system_clock> updated{};
-    std::string name{};
-    std::string owner{};
-    std::optional<std::string> namespace_name{};
-    DocumentPayloadPtr payload_ptr{};
-};
-
 struct DocumentInput {
     std::string name{};
     std::string owner{};
@@ -35,11 +26,26 @@ struct DocumentInput {
 };
 
 struct DocumentUpdateInput {
-    std::string name{};
-    std::string namespace_name{};
+    std::optional<std::string> name{};
+    std::optional<std::string> namespace_name{};
     std::optional<DocumentPayload> payload{};
 };
 
-using DocumentPtr = std::shared_ptr<Document>;
+struct DocumentInfo {
+    DocumentId id{};
+    std::chrono::time_point<std::chrono::system_clock> created{};
+    std::chrono::time_point<std::chrono::system_clock> updated{};
+    std::string name{};
+    std::string owner{};
+    std::string namespace_name{};
+};
+using DocumentInfoPtr = std::shared_ptr<DocumentInfo>;
+
+struct Document {
+    DocumentInfo info{};
+    std::optional<DocumentPayload> payload{};
+};
+
+void to_json(common::json::json& json, const Document& document);
 
 } // namespace documents::models
