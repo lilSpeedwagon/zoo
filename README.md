@@ -56,4 +56,4 @@ Target web service is a simple CRUD API generator. As a service user I can defin
     * Catch2 and Google Test Explorer
 
 ## Build and test
-The project is divided into microservices and libs. You can find them in corresponding directories. To build, debug and run unit-tests open CMake project in root directory. To build docker container with service use `./build_docker <service_name>`. Acceptance tests (based on pytest) may be runned via `./run_tests <service_name>` (corresponding docker image must be built before).
+The project is divided into microservices and libs. You can find them in corresponding directories. To build, debug and run unit-tests open CMake project in root directory. To build docker container with service use `./build_docker <service_name>`. Acceptance tests (based on pytest) may be runned via `./run_tests <service_name>` (corresponding docker image must be built before). Some tests require common utility packages. Those packages may be found in `./utils/test_utils`, use `python3 setup.py install` to install them.
