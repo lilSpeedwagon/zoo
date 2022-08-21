@@ -30,6 +30,10 @@
 # Python compiled
 *.pyc
 
+# Python packages
+*.egg
+*.egg-info
+
 # Build directory
 build/
 

@@ -29,7 +29,7 @@ jobs:
       run: ./libraries/common/lib_common_tests && ./libraries/http/lib_http_tests && ./libraries/components/lib_components_tests
     - name: install python libs
       working-directory: ./
-      run: python3 -m pip install -r requirements.txt
+      run: python3 -m pip install -r requirements.txt && cd ./utils/test_utils && sudo python3 setup.py install
     - name: build images for dummy
       working-directory: ./
       run: ./build_docker.sh dummy
