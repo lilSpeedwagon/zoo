@@ -13,3 +13,8 @@ build
 
 # tmp files
 *.log
+
+# utils and scripts
+utils
+requirements.txt
+*.sh
