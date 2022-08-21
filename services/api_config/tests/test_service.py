@@ -1,5 +1,3 @@
-import pytest
-
 
 def test_ping(api_config):
     response = api_config.get('/ping')

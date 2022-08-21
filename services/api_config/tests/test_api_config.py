@@ -1,13 +1,7 @@
 
 import pytest
 
-class MockAny:
-    # Returns True on assertion with any other object.
-    # May be used for assertion non-determined data
-    # (random values, date, time, etc.).
-
-    def __eq__(self, other):
-        return True
+from zootest.mocks import MockAny
 
 
 def _create_api_config(
