@@ -14,8 +14,7 @@ common::json::json ToJson(models::Document&& document) {
         {"created", common::format::ToString(document.info.created)},
         {"updated", common::format::ToString(document.info.updated)},
         {"name", std::move(document.info.name)},
-        {"namespace", std::move(document.info.namespace_name)},
-        {"payload", nullptr},   
+        {"namespace", std::move(document.info.namespace_name)}, 
     };
     if (document.payload.has_value()) {
         data["payload"] = std::move(document.payload.value().GetUnderlying());
