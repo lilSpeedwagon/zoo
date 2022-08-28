@@ -14,8 +14,7 @@ common::json::json ToJson(models::Document&& document) {
         {"created", common::format::ToString(document.info.created)},
         {"updated", common::format::ToString(document.info.updated)},
         {"name", std::move(document.info.name)},
-        {"namespace", std::move(document.info.namespace_name)},
-        {"payload", nullptr},   
+        {"namespace", std::move(document.info.namespace_name)}, 
     };
     if (document.payload.has_value()) {
         data["payload"] = std::move(document.payload.value().GetUnderlying());
@@ -32,10 +31,11 @@ http::Response ToResponse(models::Document&& document) {
 }
 
 http::Response ToResponse(std::vector<models::Document>&& documents) {
-    auto data = common::json::json::array();
+    auto items = common::json::json::array();
     for (auto& item : documents) {
-        data.push_back(ToJson(std::move(item)));
+        items.push_back(ToJson(std::move(item)));
     }
+    common::json::json data = {{"items", std::move(items)}};
     http::Response response{};
     response.body() = data.dump();
     return response;

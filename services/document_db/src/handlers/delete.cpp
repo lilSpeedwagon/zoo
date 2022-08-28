@@ -16,7 +16,11 @@ namespace {
 models::DocumentId ParseRequest(http::Request&& request) {
     try {
         auto data = common::json::json::parse(request.body());
-        return models::DocumentId{data.at("id").get<uint64_t>()};
+        if (auto id_it = data.find("id");
+            id_it != data.end()) {
+            return models::DocumentId{id_it->get<uint64_t>()}; 
+        }
+        throw http::exceptions::BadRequest("Key \'id\' is required.");
     } catch (const common::json::detail::exception& ex) {
         throw http::exceptions::BadRequest(ex.what());
     }

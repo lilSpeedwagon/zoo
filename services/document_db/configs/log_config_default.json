@@ -1,0 +1,5 @@
+{
+    "log_level": "debug",
+    "log_to_stdout": false,
+    "buffer_max_size": 1
+}
