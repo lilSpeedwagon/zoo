@@ -42,3 +42,9 @@ jobs:
     - name: run pytests api_config
       working-directory: ./
       run: ./run_tests.sh api_config
+    - name: build images for document_db
+      working-directory: ./
+      run: ./build_docker.sh document_db
+    - name: run pytests document_db
+      working-directory: ./
+      run: ./run_tests.sh document_db
