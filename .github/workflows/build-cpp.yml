@@ -30,21 +30,6 @@ jobs:
     - name: install python libs
       working-directory: ./
       run: python3 -m pip install -r requirements.txt && cd ./utils/test_utils && sudo python3 setup.py install
-    - name: build images for dummy
+    - name: build and test services
       working-directory: ./
-      run: ./build_docker.sh dummy
-    - name: run pytests dummy
-      working-directory: ./
-      run: ./run_tests.sh dummy
-    - name: build images for api_config
-      working-directory: ./
-      run: ./build_docker.sh api_config
-    - name: run pytests api_config
-      working-directory: ./
-      run: ./run_tests.sh api_config
-    - name: build images for document_db
-      working-directory: ./
-      run: ./build_docker.sh document_db
-    - name: run pytests document_db
-      working-directory: ./
-      run: ./run_tests.sh document_db
+      run: ./build_and_test_all.sh
