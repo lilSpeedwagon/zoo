@@ -37,10 +37,7 @@ paths:
           content:
             'application/json':
               schema:
-                type: object
-                properties:
-                  schema:
-                    $ref: "#/components/schemas/Document"
+                $ref: "#/components/schemas/Document"
         "404":
           description: Bad request.
           content:
@@ -74,10 +71,7 @@ paths:
           content:
             'application/json':
               schema:
-                type: object
-                properties:
-                  schema:
-                    $ref: "#/components/schemas/Document"
+                $ref: "#/components/schemas/Document"
         "400":
           description: Not found.
           content:
@@ -109,10 +103,7 @@ paths:
           content:
             'application/json':
               schema:
-                type: object
-                properties:
-                  schema:
-                    $ref: "#/components/schemas/Document"
+                $ref: "#/components/schemas/Document"
         "400":
           description: Not found.
           content:
@@ -144,10 +135,8 @@ paths:
           content:
             'application/json':
               schema:
-                type: object
-                properties:
-                  schema:
-                    $ref: "#/components/schemas/Document"
+                $ref: "#/components/schemas/Document"
+                    
         "400":
           description: Not found.
           content:
@@ -168,11 +157,13 @@ paths:
           content:
             'application/json':
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
                       $ref: "#/components/schemas/Document"
         "400":
           description: Not found.
