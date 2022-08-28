@@ -31,10 +31,11 @@ http::Response ToResponse(models::Document&& document) {
 }
 
 http::Response ToResponse(std::vector<models::Document>&& documents) {
-    auto data = common::json::json::array();
+    auto items = common::json::json::array();
     for (auto& item : documents) {
-        data.push_back(ToJson(std::move(item)));
+        items.push_back(ToJson(std::move(item)));
     }
+    common::json::json data = {{"items", std::move(items)}};
     http::Response response{};
     response.body() = data.dump();
     return response;
