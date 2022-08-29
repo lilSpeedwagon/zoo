@@ -32,4 +32,4 @@ jobs:
       run: python3 -m pip install -r requirements.txt && cd ./utils/test_utils && sudo python3 setup.py install
     - name: build and test services
       working-directory: ./
-      run: sudo ./build_and_test_all.sh
+      run: sudo bash ./build_and_test_all.sh
