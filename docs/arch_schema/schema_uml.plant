@@ -1,0 +1,47 @@
+@startuml
+actor ApiAdmin as admin
+actor ApiClient as client
+collections AuthService as auth
+collections ApiGateway as gateway
+collections ApiConfig as config
+collections CrudService as crud
+collections StatsService as stats
+
+group Create CRUD API
+admin -> auth : credential auth
+auth -> admin : <token>
+admin -> gateway : create config, <token>
+gateway -> config
+config -> gateway
+gateway -> admin : <config_id>
+end
+
+group Create CRUD API
+admin -> gateway : publish config <config_id>, <token>
+gateway -> config
+config -> crud : register new config
+crud -> crud : apply new schema to DB
+crud -> crud : activate endpoint <ep_key>
+config -> stats : register new config
+config -> gateway
+gateway -> admin : <ep_key>
+end
+
+group Request stats
+admin -> gateway : get stats for <config_id>, <token>
+gateway -> stats
+stats-> gateway
+gateway -> client : <stats>
+end
+
+group Request CRUD API
+client -> auth : credential auth
+auth -> client : <token>
+client -> gateway : CRUD request <ep_key>, <token>
+gateway -> crud
+crud -> stats : add request stats
+crud -> gateway
+gateway -> client : <result>
+end
+
+@enduml
