@@ -38,7 +38,7 @@ BinaryInStream& BinaryInStream::operator>>(
     int64_t count{};
     *this >> count;
     time_point = std::chrono::time_point<std::chrono::system_clock>(
-        std::chrono::seconds(count));
+        std::chrono::nanoseconds(count));
     return *this;
 }
 
@@ -62,7 +62,8 @@ BinaryOutStream& BinaryOutStream::operator<<(const std::string& str) {
 
 BinaryOutStream& BinaryOutStream::operator<<(
     const std::chrono::time_point<std::chrono::system_clock>& time_point) {
-    const auto count = time_point.time_since_epoch().count();
+    const auto count = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        time_point.time_since_epoch()).count();
     *this << count;
     return *this;
 }
