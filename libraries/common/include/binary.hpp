@@ -6,20 +6,32 @@
 #include <ostream>
 #include <vector>
 
+#include <boost/noncopyable.hpp>
+
 namespace common::binary {
 
-/// @class std::ifstream wrapper for binary I/O
-class BinaryInStream final {
-public:
-    BinaryInStream(std::ifstream&& stream);
+using BinaryByteT = char;
 
-    template<typename T>
+/// @class Raised when trying to read binary file after EOF.
+class EofException : public std::runtime_error {
+public:
+    EofException() : std::runtime_error("end of binary file is reached") {}
+};
+
+/// @class std::ifstream wrapper for binary I/O
+class BinaryInStream final : private boost::noncopyable {
+public:
+    using StreamT = std::basic_ifstream<BinaryByteT, std::char_traits<BinaryByteT>>;
+
+    BinaryInStream(const std::string& path);
+    BinaryInStream(StreamT&& stream);
+    ~BinaryInStream();
+
+    template<typename T, 
+             typename std::enable_if<std::is_arithmetic_v<T>, bool>::type = true>
     BinaryInStream& operator>>(T& value) {
-        if constexpr (std::is_arithmetic_v<T>) {
-            stream_.read(reinterpret_cast<char*>(&value), sizeof(value));
-        } else {
-            stream_ >> value;
-        }
+        constexpr size_t buffer_size = sizeof(value);
+        stream_.read(reinterpret_cast<BinaryByteT*>(&value), buffer_size);
         return *this;
     }
 
@@ -41,21 +53,23 @@ public:
         std::chrono::time_point<std::chrono::system_clock>& time_point);
 
 private:
-    std::ifstream stream_;
+    StreamT stream_;
 };
 
-/// @class std::ostream wrapper for binary I/O
-class BinaryOutStream final {
+/// @class std::ofstream wrapper for binary I/O
+class BinaryOutStream final : private boost::noncopyable {
 public:
-    BinaryOutStream(std::ofstream&& stream);
+    using StreamT = std::basic_ofstream<BinaryByteT, std::char_traits<BinaryByteT>>;
 
-    template<typename T>
+    BinaryOutStream(const std::string& path);
+    BinaryOutStream(StreamT&& stream);
+    ~BinaryOutStream();
+
+    template<typename T, 
+             typename std::enable_if<std::is_arithmetic_v<T>, bool>::type = true>
     BinaryOutStream& operator<<(const T& value) {
-        if constexpr (std::is_arithmetic_v<T>) {
-            stream_.write(reinterpret_cast<const char*>(&value), sizeof(value));
-        } else {
-            stream_ << value;
-        }
+        constexpr size_t buffer_size = sizeof(value);
+        stream_.write(reinterpret_cast<const BinaryByteT*>(&value), buffer_size);
         return *this;
     }
 
@@ -73,7 +87,7 @@ public:
         const std::chrono::time_point<std::chrono::system_clock>& time_point);
 
 private:
-    std::ofstream stream_;
+    StreamT stream_;
 };
 
 } // namespace common::binary

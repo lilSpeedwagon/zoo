@@ -1,15 +1,35 @@
 #include <binary.hpp>
 
+
 namespace common::binary {
 
-BinaryInStream::BinaryInStream(std::ifstream&& stream) 
-    : stream_(std::move(stream)) {}
+namespace {
+
+void SetupStreamExceptions(
+    std::basic_ios<BinaryByteT, std::char_traits<BinaryByteT>>& stream) {
+    stream.exceptions(
+        std::ifstream::failbit | std::ifstream::eofbit | std::ifstream::badbit);
+}
+
+} // namespace
+
+BinaryInStream::BinaryInStream(const std::string& path)
+    : stream_(path, std::ios::in) {
+    SetupStreamExceptions(stream_);
+}
+
+BinaryInStream::BinaryInStream(StreamT&& stream) 
+    : stream_(std::move(stream)) {
+    SetupStreamExceptions(stream_);
+}
+
+BinaryInStream::~BinaryInStream() {}
 
 BinaryInStream& BinaryInStream::operator>>(std::string& str) {
     size_t count{};
     *this >> count;
     str.resize(count);
-    stream_.read(str.data(), count);
+    stream_.read(reinterpret_cast<BinaryByteT*>(str.data()), count);
     return *this;
 }
 
@@ -22,12 +42,21 @@ BinaryInStream& BinaryInStream::operator>>(
     return *this;
 }
 
-BinaryOutStream::BinaryOutStream(std::ofstream&& stream) 
-    : stream_(std::move(stream)) {}
+BinaryOutStream::BinaryOutStream(const std::string& path)
+    : stream_(path, std::ios::out) {
+    SetupStreamExceptions(stream_);
+}
+
+BinaryOutStream::BinaryOutStream(StreamT&& stream) 
+    : stream_(std::move(stream)) {
+    SetupStreamExceptions(stream_);
+}
+
+BinaryOutStream::~BinaryOutStream() {}
 
 BinaryOutStream& BinaryOutStream::operator<<(const std::string& str) {
     *this << str.size();
-    stream_.write(str.data(), str.size());
+    stream_.write(reinterpret_cast<const BinaryByteT*>(str.data()), str.size());
     return *this;
 }
 

@@ -12,6 +12,7 @@ set(THIRDPARTY_LIBS ${LIBS_DIR}/thirdparty)
 
 # sources
 set(SOURCES
+    src/binary/binary.cpp
     src/config/config.cpp
     src/config/logging_config.cpp
     src/logging/logger.cpp
@@ -49,6 +50,7 @@ target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 # test sources
 set(TEST_SOURCES
+    tests/binary.cpp
     tests/config.cpp
     tests/format.cpp
     tests/log.cpp
