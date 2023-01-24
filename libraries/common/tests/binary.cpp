@@ -90,4 +90,36 @@ TEST_CASE("IntegersIO", "[Binary]") {
     }
 }
 
+TEST_CASE("vector", "[Binary]") {
+    std::vector<int> numbers = {1, 2, 3};
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << numbers;
+    }
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+        std::vector<int> result;
+        wrapper_in >> result;
+        
+        CHECK(numbers == result);
+    }
+}
+
+TEST_CASE("chrono", "[Binary]") {
+    std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << tp;
+    }
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+        std::chrono::system_clock::time_point result;
+        wrapper_in >> result;
+        
+        CHECK(tp == result);
+    }
+}
+
 } // namespace common::tests::binary
