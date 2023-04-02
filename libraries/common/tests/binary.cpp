@@ -90,6 +90,25 @@ TEST_CASE("IntegersIO", "[Binary]") {
     }
 }
 
+TEST_CASE("BooleanIO", "[Binary]") {
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << true;
+        wrapper_out << false;
+    }
+    
+    bool b1;
+    bool b2;
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+        wrapper_in >> b1;
+        wrapper_in >> b2;
+    }
+
+    CHECK(b1 == true);
+    CHECK(b2 == false);
+}
+
 TEST_CASE("vector", "[Binary]") {
     std::vector<int> numbers = {1, 2, 3};
 
