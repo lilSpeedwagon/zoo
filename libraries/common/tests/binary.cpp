@@ -92,6 +92,35 @@ TEST_CASE("IntegersIO", "[Binary]") {
     }
 }
 
+
+TEST_CASE("FloatingPointIO", "[Binary]") {
+    float float_positive = 123.456f;
+    float float_negative = -123.456f;
+    double double_positive = 123.456789;
+    double double_negative = -123.456789;
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << float_positive << float_negative;
+        wrapper_out << double_positive << double_negative;
+    }
+
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+
+        float n1;
+        float n2;
+        double n3;
+        double n4;
+        wrapper_in >> n1 >> n2;
+        wrapper_in >> n3 >> n4;
+        CHECK(n1 == float_positive);
+        CHECK(n2 == float_negative);
+        CHECK(n3 == double_positive);
+        CHECK(n4 == double_negative);
+    }
+}
+
 TEST_CASE("BooleanIO", "[Binary]") {
     {
         common::binary::BinaryOutStream wrapper_out(kFileName);
@@ -111,7 +140,7 @@ TEST_CASE("BooleanIO", "[Binary]") {
     CHECK(b2 == false);
 }
 
-TEST_CASE("vector", "[Binary]") {
+TEST_CASE("VectorIO", "[Binary]") {
     std::vector<int> numbers = {1, 2, 3};
 
     {
@@ -127,7 +156,7 @@ TEST_CASE("vector", "[Binary]") {
     }
 }
 
-TEST_CASE("list", "[Binary]") {
+TEST_CASE("ListIO", "[Binary]") {
     std::list<int> numbers = {1, 2, 3};
 
     {
@@ -144,7 +173,7 @@ TEST_CASE("list", "[Binary]") {
 }
 
 
-TEST_CASE("chrono", "[Binary]") {
+TEST_CASE("ChronoIO", "[Binary]") {
     std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
 
     {
