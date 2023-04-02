@@ -10,6 +10,7 @@
 
 #include <components/include/component_base.hpp>
 
+#include <fs_sink/fs_sink.hpp>
 #include <models/document.hpp>
 
 namespace documents::components {
@@ -26,7 +27,7 @@ public:
     void Reset() override;
     const char* Name() const override;
 
-    documents::models::Document Get(models::DocumentId id, bool fetch_payload = false);
+    models::Document Get(models::DocumentId id, bool fetch_payload = false);
     std::vector<models::Document> List();
     models::Document Add(models::DocumentInput&& input);
     models::Document Update(models::DocumentId id, models::DocumentUpdateInput&& input);
@@ -35,12 +36,17 @@ public:
 private:
     models::DocumentId NextId();
     models::DocumentPayloadPtr FetchPayload(models::DocumentId id);
+    void OnDocumentUpdated();
     
     // shared mutex implements multiple readers, single writer concept
     boost::upgrade_mutex data_access_mutex_;
     std::atomic<size_t> id_counter_;
-    std::unordered_map<models::DocumentId, models::DocumentInfoPtr> documents_info_;
+    models::DocumentInfoMap documents_info_;
+
+    // for now it is in-memory data storage
+    // TODO store payloads in FS, apply some LRU cache
     std::unordered_map<models::DocumentId, models::DocumentPayloadPtr> payload_cache_;
+    fs_sink::FileStorageSink sink_;
 };
 
 } // namespace documents::components

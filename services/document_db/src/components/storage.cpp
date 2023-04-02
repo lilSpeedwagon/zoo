@@ -9,8 +9,7 @@ namespace documents::components {
 namespace {
 
 auto FindDocumentInfo(
-    const std::unordered_map<models::DocumentId, models::DocumentInfoPtr>& storage,
-    models::DocumentId id) {
+    const models::DocumentInfoMap& storage, models::DocumentId id) {
     if (const auto it = storage.find(id);
         it != storage.end()) {
         return it;
@@ -34,8 +33,9 @@ auto FindDocumentPayload(
 // Current implementation is an in-memory prototype.
 // TODO: move the storage into a filesystem.
 
-Storage::Storage() {
-
+Storage::Storage() : data_access_mutex_{}, id_counter_{0},
+                     documents_info_{}, payload_cache_{}, sink_("./") {
+    documents_info_ = sink_.LoadMeta();
 }
 
 Storage::~Storage() {}
@@ -94,6 +94,7 @@ models::Document Storage::Add(models::DocumentInput&& input) {
     documents_info_[id] = std::make_shared<models::DocumentInfo>(info);
     payload_cache_[id] = 
         std::make_shared<models::DocumentPayload>(std::move(input.payload));
+    OnDocumentUpdated();
     return models::Document{
         info,          // info
         std::nullopt,  // payload
@@ -120,6 +121,7 @@ models::Document Storage::Update(models::DocumentId id,
         }
         info.updated = std::chrono::system_clock::now();
     }
+    OnDocumentUpdated();
     return models::Document {
         info,           // info
         std::nullopt,   // payload
@@ -136,11 +138,16 @@ models::Document Storage::Delete(models::DocumentId id) {
     };
     documents_info_.erase(info_it);
     payload_cache_.erase(payload_it);
+    OnDocumentUpdated();
     return result;
 }
 
 models::DocumentId Storage::NextId() {
     return models::DocumentId{id_counter_.fetch_add(1, std::memory_order::memory_order_relaxed)};  
+}
+
+void Storage::OnDocumentUpdated() {
+    sink_.Store(documents_info_);
 }
 
 } // namespace documents::components

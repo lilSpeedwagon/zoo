@@ -54,3 +54,6 @@ libraries/boost_1_76_0
 
 # Logs
 *.log
+
+# Other
+meta.ddb
