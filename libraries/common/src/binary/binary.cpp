@@ -13,7 +13,9 @@ void SetupStreamExceptions(
 
 } // namespace
 
-BinaryInStream::BinaryInStream(const std::string& path)
+EofException::EofException() : std::runtime_error("end of binary file is reached") {}
+
+BinaryInStream::BinaryInStream(const std::filesystem::path& path)
     : stream_(path, std::ios::in) {
     SetupStreamExceptions(stream_);
 }
@@ -23,7 +25,16 @@ BinaryInStream::BinaryInStream(StreamT&& stream)
     SetupStreamExceptions(stream_);
 }
 
+BinaryInStream::BinaryInStream(BinaryInStream&& other) {
+    std::swap(stream_, other.stream_);
+}
+
 BinaryInStream::~BinaryInStream() {}
+
+BinaryInStream& BinaryInStream::operator=(BinaryInStream&& other) {
+    std::swap(stream_, other.stream_);
+    return *this;
+}
 
 BinaryInStream& BinaryInStream::operator>>(std::string& str) {
     size_t count{};
@@ -42,7 +53,7 @@ BinaryInStream& BinaryInStream::operator>>(
     return *this;
 }
 
-BinaryOutStream::BinaryOutStream(const std::string& path)
+BinaryOutStream::BinaryOutStream(const std::filesystem::path& path)
     : stream_(path, std::ios::out) {
     SetupStreamExceptions(stream_);
 }
@@ -52,7 +63,16 @@ BinaryOutStream::BinaryOutStream(StreamT&& stream)
     SetupStreamExceptions(stream_);
 }
 
+BinaryOutStream::BinaryOutStream(BinaryOutStream&& other) {
+    std::swap(stream_, other.stream_);
+}
+
 BinaryOutStream::~BinaryOutStream() {}
+
+BinaryOutStream& BinaryOutStream::operator=(BinaryOutStream&& other) {
+    std::swap(stream_, other.stream_);
+    return *this;
+}
 
 BinaryOutStream& BinaryOutStream::operator<<(const std::string& str) {
     *this << str.size();
