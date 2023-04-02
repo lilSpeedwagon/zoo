@@ -1,5 +1,7 @@
 #include <chrono>
+#include <list>
 #include <string>
+#include <vector>
 
 #include <catch2/catch.hpp>
 
@@ -124,6 +126,23 @@ TEST_CASE("vector", "[Binary]") {
         CHECK(numbers == result);
     }
 }
+
+TEST_CASE("list", "[Binary]") {
+    std::list<int> numbers = {1, 2, 3};
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << numbers;
+    }
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+        std::list<int> result;
+        wrapper_in >> result;
+        
+        CHECK(numbers == result);
+    }
+}
+
 
 TEST_CASE("chrono", "[Binary]") {
     std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();

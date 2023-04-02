@@ -3,6 +3,7 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -60,20 +61,27 @@ public:
         return *this;
     }
 
-    /// @brief Reads a vector of values of type T.
-    /// @tparam T vector item type
-    /// @param data ref to destination vector
+    /// @brief Reads a dynamic container of type T.
+    /// @tparam T container type
+    /// @param data ref to destination container
     /// @return ref to self
-    template<typename T>
-    BinaryInStream& operator>>(std::vector<T>& data) {
+    template<typename T,
+             typename std::enable_if<std::is_same<T, std::vector<typename T::value_type>>::value ||
+                                     std::is_same<T, std::list<typename T::value_type>>::value, bool>::type = true>
+    BinaryInStream& operator>>(T& data) {
+        using value_type = typename T::value_type;
+
         size_t count{};
         *this >> count;
-        data.resize(count);
+        if constexpr (std::is_same<T, std::vector<value_type>>::value) {
+            data.reserve(count);
+        }
+
         for (size_t i = 0; i < count; i++) {
-            T item{};
+            typename T::value_type item{};
             *this >> item;
-            data[i] = std::move(item);
-        } 
+            data.emplace_back(std::move(item));
+        }
         return *this;
     }
     
@@ -133,12 +141,14 @@ public:
         return *this;
     }
 
-    /// @brief Writes a vector of values of type T to the file.
-    /// @tparam T vector item type
-    /// @param data vector to store
+    /// @brief Writes a dynamic container of type T to the file.
+    /// @tparam T container type
+    /// @param data container to store
     /// @return ref to self
-    template<typename T>
-    BinaryOutStream& operator<<(const std::vector<T>& data) {
+    template<typename T,
+             typename std::enable_if<std::is_same<T, std::vector<typename T::value_type>>::value ||
+                                     std::is_same<T, std::list<typename T::value_type>>::value, bool>::type = true>
+    BinaryOutStream& operator<<(const T& data) {
         *this << data.size();
         for (const auto& item : data) {
             *this << item;
