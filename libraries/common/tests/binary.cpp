@@ -1,5 +1,6 @@
 #include <chrono>
 #include <list>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -186,6 +187,29 @@ TEST_CASE("ChronoIO", "[Binary]") {
         wrapper_in >> result;
         
         CHECK(tp == result);
+    }
+}
+
+TEST_CASE("OptionalIO", "[Binary]") {
+    std::optional<int> int_opt_empty = std::nullopt;
+    std::optional<int> int_opt = 123;
+    std::optional<std::string> str_opt = "str";
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << int_opt_empty << int_opt << str_opt;
+    }
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+        
+        std::optional<int> opt1;
+        std::optional<int> opt2;
+        std::optional<std::string> opt3;
+        wrapper_in >> opt1 >> opt2 >> opt3;
+        
+        CHECK(opt1 == int_opt_empty);
+        CHECK(opt2 == int_opt);
+        CHECK(opt3 == str_opt);
     }
 }
 
