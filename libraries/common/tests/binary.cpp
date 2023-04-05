@@ -7,6 +7,7 @@
 #include <catch2/catch.hpp>
 
 #include <common/include/binary.hpp>
+#include <common/include/strong_typedef.hpp>
 
 
 // Tests from this section cause a side-effect:
@@ -210,6 +211,29 @@ TEST_CASE("OptionalIO", "[Binary]") {
         CHECK(opt1 == int_opt_empty);
         CHECK(opt2 == int_opt);
         CHECK(opt3 == str_opt);
+    }
+}
+
+TEST_CASE("StrongTypedefIO", "[Binary]") {
+    using IntT = common::types::StrongTypedef<int, struct IntTag>;
+    using StrT = common::types::StrongTypedef<std::string, struct StrTag>;
+
+    IntT int_val(123);
+    StrT str_val("str");
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << int_val << str_val;
+    }
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+        
+        IntT st1{};
+        StrT st2{};
+        wrapper_in >> st1 >> st2;
+        
+        CHECK(st1 == int_val);
+        CHECK(st2 == str_val);
     }
 }
 

@@ -10,6 +10,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <strong_typedef.hpp>
+
 
 namespace common::binary {
 
@@ -118,6 +120,19 @@ public:
         return *this;
     }
 
+    /// @brief Reads a single value of strongly defined type T
+    /// @tparam T value type, must by default constructible
+    /// @tparam Tag strongtypedef tag
+    /// @param value_opt value where to store data
+    /// @return ref to self
+    template<typename T, typename Tag>
+    BinaryInStream& operator>>(common::types::StrongTypedef<T, Tag>& value) {
+        T data{};
+        *this >> data;
+        value.GetUnderlying() = std::move(data);
+        return *this;
+    }
+
 private:
     StreamT stream_;
 };
@@ -199,6 +214,17 @@ public:
         if (value_opt.has_value()) {
             *this << value_opt.value();
         }
+        return *this;
+    }
+
+    /// @brief Writes a single value with strongly defined type T
+    /// @tparam T value type, must be default constructible to read it afterwards
+    /// @tparam Tag StrongTypedef tag
+    /// @param value_opt common::types::StrongTypedef<T> value to write
+    /// @return ref to self
+    template<typename T, typename Tag>
+    BinaryOutStream& operator<<(const common::types::StrongTypedef<T, Tag>& value_opt) {
+        *this << value_opt.GetUnderlying();
         return *this;
     }
 
