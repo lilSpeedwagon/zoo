@@ -28,8 +28,6 @@ public:
 private:
     /// @brief inits FS files in the current directory
     void InitFs();
-
-    std::fstream OpenMetaFile(std::ios_base::openmode mode);
     
     std::filesystem::path path_;
     std::filesystem::path meta_path_;

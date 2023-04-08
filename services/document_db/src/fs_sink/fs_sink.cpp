@@ -4,9 +4,13 @@
 #include <filesystem>
 #include <fstream>
 
+#include <common/include/binary.hpp>
 #include <common/include/logging.hpp>
 #include <common/include/format.hpp>
 #include <common/include/utils/errors.hpp>
+
+#include <fs_sink/db_binary.hpp>
+
 
 namespace documents::fs_sink {
 
@@ -34,81 +38,34 @@ std::filesystem::path GetIndexPath(std::filesystem::path path) {
 }
 
 template<typename T>
-std::ofstream& operator<<(std::ofstream& stream, const T&& value) {
-    if constexpr (std::is_integral_v<T>) {
-        stream.write(reinterpret_cast<const char*>(&value), sizeof(value));     
-    } else {
-        stream << value;
+void CheckStream(const T& stream) {
+    if (!stream.is_open() || !stream.good()) {
+        throw std::runtime_error(common::format::Format(
+            "Cannot open document_db index file: {}",
+            common::utils::errors::GetLastError()));
     }
-    return stream;
 }
 
-std::ofstream& operator<<(std::ofstream& stream,
-                          const std::chrono::time_point<std::chrono::system_clock>& time_point) {
-    auto count = time_point.time_since_epoch().count();
-    stream.write(reinterpret_cast<const char*>(&count), sizeof(count)); 
-    return stream;
-}
-
-std::ofstream& operator<<(std::ofstream& stream, const std::string& str) {
-    stream << str.size() << str;
-    return stream;
-}
-
-std::ofstream& operator<<(std::ofstream& stream, const models::DocumentInfo& info) {
-    stream << kMetaItemPrefix;
-    stream << info.id.GetUnderlying();
-    stream << info.created;
-    stream << info.updated;
-    stream << info.name.size() << info.name;
-    stream << info.namespace_name.size() << info.namespace_name.size();
-    stream << info.owner.size() << info.owner;
-    return stream;
-}
-
-template<typename T>
-std::ifstream& operator>>(std::ifstream& stream, T&& value) {
-    if constexpr (std::is_integral_v<T>) {
-        stream.read(reinterpret_cast<const char*>(&value), sizeof(value));     
-    } else {
-        stream >> value;
+auto OpenMetaFileIn(const std::filesystem::path& path) {
+    try {
+        std::ifstream stream(path, kFileReadMode);
+        return common::binary::BinaryInStream(std::move(stream));
+    } catch (const std::runtime_error& ex) {
+        throw std::runtime_error(common::format::Format(
+            "Cannot open document_db index file {}: {}",
+            path.string(), ex.what()));
     }
-    return stream;
 }
 
-std::ifstream& operator>>(std::ifstream& stream,
-                          std::chrono::time_point<std::chrono::system_clock>& time_point) {
-    int64_t count{};
-    stream >> count;
-    time_point = std::chrono::time_point<std::chrono::system_clock>(
-        std::chrono::seconds(count));
-    return stream;
-}
-
-std::ifstream& operator>>(std::ifstream& stream, models::DocumentInfo& info) {
-    char c{};
-    stream >> c;
-    if (c != kMetaItemPrefix) {
-        throw std::runtime_error(
-            common::format::Format("Invalid meta data item prefix: {}", c));
+auto OpenMetaFileOut(const std::filesystem::path& path) {
+    try {
+        std::ofstream stream(path, kFileWriteMode);
+        return common::binary::BinaryOutStream(std::move(stream));
+    } catch (const std::runtime_error& ex) {
+        throw std::runtime_error(common::format::Format(
+            "Cannot open document_db index file {}: {}",
+            path.string(), ex.what()));
     }
-    uint64_t id{};
-    stream >> id;
-    info.id = id;
-    stream >> info.created;
-    stream >> info.updated;
-    stream >> info.name;
-    stream >> info.namespace_name;
-    stream >> info.owner;
-    return stream;
-}
-
-std::ifstream& operator>>(std::ifstream& stream, std::string& str) {
-    size_t count{};
-    stream >> count;
-    str.reserve(count);
-    stream.read(str.data(), count);
-    return stream;
 }
 
 } // namespace
@@ -128,11 +85,11 @@ void FileStorageSink::Store(const models::DocumentInfoMap& documents_info_) {
     // TODO acquire FS mutex
     // TODO start FS transaction
 
-    auto stream = OpenMetaFile(kFileWriteMode);
+    auto stream = OpenMetaFileOut(meta_path_);
     stream << kMetaPrefix;
     stream << documents_info_.size();
     for (const auto& [_, info] : documents_info_) {
-        stream << info;
+        stream << *info;
     }
 
     // TODO commit/rollback FS transaction
@@ -144,21 +101,17 @@ void FileStorageSink::Store(const models::DocumentInfoMap& documents_info_) {
 models::DocumentInfoMap FileStorageSink::LoadMeta() {
     LOG_INFO() << "Loading documents info from FS";
 
-    auto stream = OpenMetaFile(kFileReadMode);
-
-    /*while(!stream.eof()) {
-        std::string s{};
-        stream >> s;
-        LOG_DEBUG() << s;
-    }
-    return {};*/
+    auto stream = OpenMetaFileIn(meta_path_);
 
     std::string prefix{};
-    stream >> prefix;
-    if (prefix.empty() && stream.eof()) {
+    try {
+        stream >> prefix;
+    } catch (const std::runtime_error& ex) {}
+    if (prefix.empty() && stream.Eof()) {
         LOG_DEBUG() << "Meta data is empty";
         return models::DocumentInfoMap{};
     }
+
     if (prefix != kMetaPrefix) {
         throw std::runtime_error(
             common::format::Format("Invalid meta data prefix: {}", prefix));
@@ -169,9 +122,9 @@ models::DocumentInfoMap FileStorageSink::LoadMeta() {
     LOG_DEBUG() << count << " document info entries found";
     models::DocumentInfoMap result{};
     for (size_t i = 0; i < count; i++) {
-        models::DocumentInfoPtr info_ptr{};
-        stream >> *info_ptr;
-        result[info_ptr->id] = info_ptr;
+        models::DocumentInfo document_info{};
+        stream >> document_info;
+        result[document_info.id] = std::make_shared<models::DocumentInfo>(std::move(document_info));
     }
     return result;
 }
@@ -183,19 +136,10 @@ void FileStorageSink::InitFs() {
     const auto is_index_exists = std::filesystem::exists(meta_path_);
     if (!is_index_exists) {
         // touch index file
-        OpenMetaFile(std::ios::in | std::ios::binary);
+        OpenMetaFileOut(meta_path_);
     }
 }
 
-std::fstream FileStorageSink::OpenMetaFile(std::ios_base::openmode mode) {
-    std::fstream stream(meta_path_, mode);
-    if (!stream.is_open() || !stream.good()) {
-        throw std::runtime_error(common::format::Format(
-            "Cannot open document_db index file \"{}\": {}",
-            meta_path_.generic_string(), common::utils::errors::GetLastError()));
-    }
-    return stream;
-}
 
 
 } // namespace documents::fs_sink

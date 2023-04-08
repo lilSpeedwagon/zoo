@@ -30,17 +30,15 @@ auto FindDocumentPayload(
 
 } // namespace
 
-// Current implementation is an in-memory prototype.
-// TODO: move the storage into a filesystem.
-
 Storage::Storage() : data_access_mutex_{}, id_counter_{0},
-                     documents_info_{}, payload_cache_{}, sink_("./") {
-    documents_info_ = sink_.LoadMeta();
-}
+                     documents_info_{}, payload_cache_{}, sink_("./") {}
 
 Storage::~Storage() {}
 
-void Storage::Init() {}
+void Storage::Init() {
+    documents_info_ = sink_.LoadMeta();
+    // payload_cache_ = ...
+}
 
 void Storage::Reset() {
     boost::lock_guard lock(data_access_mutex_);

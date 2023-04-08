@@ -10,7 +10,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include <strong_typedef.hpp>
+#include <common/include/strong_typedef.hpp>
 
 
 namespace common::binary {
@@ -46,6 +46,9 @@ public:
 
     /// @brief dtor
     ~BinaryInStream();
+
+    /// @brief Check whether the end of file was reached.
+    bool Eof() const;
 
     /// @brief Move assignment operator
     /// @param other other stream
@@ -160,6 +163,9 @@ public:
 
     /// @brief dtor
     ~BinaryOutStream();
+
+    /// @brief Check whether the end of file was reached.
+    bool Eof() const;
 
     /// @brief Move assignment operator
     /// @param other other stream
