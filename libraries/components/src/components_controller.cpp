@@ -57,7 +57,7 @@ ComponentsController::~ComponentsController() {}
 
 void ComponentsController::RunAsync() {
     LOG_INFO() << "Running ComponentsController";
-    is_running_ = false;
+    is_running_ = true;
     server_ptr_->Listen();
     pool_.Run();
 }

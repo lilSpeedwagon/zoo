@@ -11,6 +11,8 @@
 
 namespace documents::fs_sink {
 
+/// @brief Database file storage adapter. Stores document index and
+/// payloads to specific file structures.
 class FileStorageSink : private boost::noncopyable{
 public:
     FileStorageSink(const std::string& path);
@@ -24,6 +26,8 @@ public:
 
     /// @brief Loads meta data from FS
     models::DocumentInfoMap LoadMeta();
+
+    // TODO store/load DocumentPayload
 
 private:
     /// @brief inits FS files in the current directory

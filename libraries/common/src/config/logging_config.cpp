@@ -23,6 +23,7 @@ T GetOrDefault(const common::json::json& data, const std::string& key,
 
 logging::LogLevel ParseLogLevel(const std::string& log_level) {
     static const std::unordered_map<std::string, logging::LogLevel> levels = {
+        {"trace", logging::LogLevel::Trace},
         {"debug", logging::LogLevel::Debug},
         {"info", logging::LogLevel::Info},
         {"warning", logging::LogLevel::Warning},

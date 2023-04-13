@@ -14,11 +14,9 @@
 
 namespace documents::fs_sink {
 
-// index:
-// page + offset
-// update index structure on create/move document
-// store index structure on disk
-// store whole index every time?
+// Documents index (DocumentInfo + DocumentPosition) is stored to a separate file meta.ddb.
+// Document payloads are stored to a number of data files. Indexed DocumentPosition
+// provides information about the exact location of a specific DocumentPayload. 
 
 namespace {
 
@@ -139,7 +137,5 @@ void FileStorageSink::InitFs() {
         OpenMetaFileOut(meta_path_);
     }
 }
-
-
 
 } // namespace documents::fs_sink

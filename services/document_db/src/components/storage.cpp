@@ -4,6 +4,7 @@
 
 #include <models/exceptions.hpp>
 
+
 namespace documents::components {
 
 namespace {
@@ -33,17 +34,19 @@ auto FindDocumentPayload(
 Storage::Storage() : data_access_mutex_{}, id_counter_{0},
                      documents_info_{}, payload_cache_{}, sink_("./") {}
 
-Storage::~Storage() {}
+Storage::~Storage() {
+    Unload();
+}
 
 void Storage::Init() {
-    documents_info_ = sink_.LoadMeta();
-    // payload_cache_ = ...
+    Load();
 }
 
 void Storage::Reset() {
-    boost::lock_guard lock(data_access_mutex_);
-    documents_info_.clear();
-    payload_cache_.clear();
+    Unload();
+    Load();
+    // reload from FS
+    // reset caches
 }
 
 const char* Storage::Name() const { return kName; };
@@ -140,12 +143,29 @@ models::Document Storage::Delete(models::DocumentId id) {
     return result;
 }
 
+size_t Storage::Clear() {
+    boost::lock_guard lock(data_access_mutex_);
+    auto count = documents_info_.size();
+    Unload();
+    OnDocumentUpdated();
+    return count;
+}
+
 models::DocumentId Storage::NextId() {
     return models::DocumentId{id_counter_.fetch_add(1, std::memory_order::memory_order_relaxed)};  
 }
 
 void Storage::OnDocumentUpdated() {
     sink_.Store(documents_info_);
+}
+
+void Storage::Load() {
+    documents_info_ = sink_.LoadMeta();
+}
+
+void Storage::Unload() {
+    documents_info_.clear();
+    payload_cache_.clear();
 }
 
 } // namespace documents::components

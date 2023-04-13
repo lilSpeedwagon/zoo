@@ -264,3 +264,10 @@ def test_delete_twice(document_db):
                                 body={'id': document['id']})
     assert(response.status_code == 404)
     assert(response.text == f'Document with id=\'{document["id"]}\' not found')
+
+
+def test_clear(document_db):
+    documents = [_create_document(document_db) for i in range(3)]
+    response = document_db.post('/api/v1/documents/clear')
+    assert(response.status_code == 200)
+    assert(response.json() == {'items_deleted': len(documents)})
