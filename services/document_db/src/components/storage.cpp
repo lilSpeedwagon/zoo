@@ -45,8 +45,6 @@ void Storage::Init() {
 void Storage::Reset() {
     Unload();
     Load();
-    // reload from FS
-    // reset caches
 }
 
 const char* Storage::Name() const { return kName; };

@@ -23,8 +23,8 @@ namespace {
 static const std::ios_base::openmode kFileWriteMode = std::ios::binary | std::ios::out;
 static const std::ios_base::openmode kFileReadMode = std::ios::binary | std::ios::in;
 static const std::string kMetaPrefix = "META";
-static const char kMetaItemPrefix = 'I';
 
+// Document index model
 struct DocumentPosition {
     size_t page_index{};
     size_t page_offset{};
@@ -68,12 +68,21 @@ auto OpenMetaFileOut(const std::filesystem::path& path) {
 
 } // namespace
 
-FileStorageSink::FileStorageSink(const std::string& path) 
+FileStorageSink::FileStorageSink(const std::filesystem::path& path) 
     : path_(path), meta_path_(GetIndexPath(path_)) {
     InitFs();
 }
 
 FileStorageSink::~FileStorageSink() {}
+
+FileStorageSink::FileStorageSink(FileStorageSink&& other) {
+    Swap(std::move(other));
+}
+
+FileStorageSink& FileStorageSink::operator=(FileStorageSink&& other) {
+    Swap(std::move(other));
+    return *this;
+}
 
 void FileStorageSink::SyncWithFs() {}
     
@@ -136,6 +145,11 @@ void FileStorageSink::InitFs() {
         // touch index file
         OpenMetaFileOut(meta_path_);
     }
+}
+
+void FileStorageSink::Swap(FileStorageSink&& other) {
+    std::swap(path_, other.path_);
+    std::swap(meta_path_, other.meta_path_);
 }
 
 } // namespace documents::fs_sink

@@ -9,14 +9,18 @@
 
 #include <models/document.hpp>
 
+
 namespace documents::fs_sink {
 
 /// @brief Database file storage adapter. Stores document index and
 /// payloads to specific file structures.
-class FileStorageSink : private boost::noncopyable{
+class FileStorageSink : private boost::noncopyable {
 public:
-    FileStorageSink(const std::string& path);
+    FileStorageSink(const std::filesystem::path& path);
+    FileStorageSink(FileStorageSink&& other);
     ~FileStorageSink();
+
+    FileStorageSink& operator=(FileStorageSink&& other);
 
     /// @brief uploads data from FS to memory 
     void SyncWithFs();
@@ -32,6 +36,8 @@ public:
 private:
     /// @brief inits FS files in the current directory
     void InitFs();
+
+    void Swap(FileStorageSink&& other);
     
     std::filesystem::path path_;
     std::filesystem::path meta_path_;

@@ -52,7 +52,7 @@ public:
     models::Document Update(models::DocumentId id, models::DocumentUpdateInput&& input);
 
     /// @brief Deletes previously stored document
-    /// @param id 
+    /// @param id document id
     /// @return deleted document
     /// @throws NotFoundException if document is not found
     documents::models::Document Delete(models::DocumentId id);
