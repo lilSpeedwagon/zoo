@@ -5,6 +5,9 @@ namespace common::binary {
 
 namespace {
 
+static const std::ios_base::openmode kFileWriteMode = std::ios::binary | std::ios::out;
+static const std::ios_base::openmode kFileReadMode = std::ios::binary | std::ios::in;
+
 void SetupStreamExceptions(
     std::basic_ios<BinaryByteT, std::char_traits<BinaryByteT>>& stream) {
     stream.exceptions(
@@ -16,13 +19,15 @@ void SetupStreamExceptions(
 EofException::EofException() : std::runtime_error("end of binary file is reached") {}
 
 BinaryInStream::BinaryInStream(const std::filesystem::path& path)
-    : stream_(path, std::ios::in) {
+    : stream_(path, kFileReadMode) {
     SetupStreamExceptions(stream_);
+    stream_.seekg(0);
 }
 
 BinaryInStream::BinaryInStream(StreamT&& stream) 
     : stream_(std::move(stream)) {
     SetupStreamExceptions(stream_);
+    stream_.seekg(0);
 }
 
 BinaryInStream::BinaryInStream(BinaryInStream&& other) {
@@ -30,6 +35,10 @@ BinaryInStream::BinaryInStream(BinaryInStream&& other) {
 }
 
 BinaryInStream::~BinaryInStream() {}
+
+bool BinaryInStream::Eof() const {
+    return stream_.eof();
+}
 
 BinaryInStream& BinaryInStream::operator=(BinaryInStream&& other) {
     std::swap(stream_, other.stream_);
@@ -54,7 +63,7 @@ BinaryInStream& BinaryInStream::operator>>(
 }
 
 BinaryOutStream::BinaryOutStream(const std::filesystem::path& path)
-    : stream_(path, std::ios::out) {
+    : stream_(path, kFileWriteMode) {
     SetupStreamExceptions(stream_);
 }
 
@@ -68,6 +77,10 @@ BinaryOutStream::BinaryOutStream(BinaryOutStream&& other) {
 }
 
 BinaryOutStream::~BinaryOutStream() {}
+
+bool BinaryOutStream::Eof() const {
+    return stream_.eof();
+}
 
 BinaryOutStream& BinaryOutStream::operator=(BinaryOutStream&& other) {
     std::swap(stream_, other.stream_);

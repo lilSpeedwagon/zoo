@@ -14,6 +14,8 @@ set(HEADERS_DIR ./src)
 # sources
 set(SOURCES
     src/components/storage.cpp
+    src/fs_sink/fs_sink.cpp
+    src/handlers/clear.cpp
     src/handlers/create.cpp
     src/handlers/update.cpp
     src/handlers/delete.cpp

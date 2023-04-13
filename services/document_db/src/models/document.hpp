@@ -46,6 +46,9 @@ struct Document {
     std::optional<DocumentPayload> payload{};
 };
 
+using DocumentInfoMap = 
+    std::unordered_map<models::DocumentId, models::DocumentInfoPtr>;
+
 void to_json(common::json::json& json, const Document& document);
 
 } // namespace documents::models

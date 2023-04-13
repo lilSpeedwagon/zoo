@@ -4,10 +4,13 @@
 #include <filesystem>
 #include <fstream>
 #include <list>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
+
+#include <common/include/strong_typedef.hpp>
 
 
 namespace common::binary {
@@ -43,6 +46,9 @@ public:
 
     /// @brief dtor
     ~BinaryInStream();
+
+    /// @brief Check whether the end of file was reached.
+    bool Eof() const;
 
     /// @brief Move assignment operator
     /// @param other other stream
@@ -92,9 +98,43 @@ public:
     
     /// @brief Reads a single chrono::time_point value.
     /// @param time_point ref to value destination
-    /// @return ref to result
+    /// @return ref to self
     BinaryInStream& operator>>(
         std::chrono::time_point<std::chrono::system_clock>& time_point);
+
+    /// @brief Reads a single optional value of type T
+    /// @tparam T value type, must by default constructible
+    /// @param value_opt std::optional<T> where to store result
+    /// @return ref to self
+    template<typename T,
+             typename std::enable_if<std::is_default_constructible_v<T>, bool>::type = true>
+    BinaryInStream& operator>>(std::optional<T>& value_opt) {
+        bool has_value{};
+        *this >> has_value;
+        if (has_value) {
+            T value{};
+            *this >> value;
+            if constexpr (std::is_move_constructible_v<T>) {
+                value_opt.emplace(std::move(value));
+            } else {
+                value_opt = value;
+            }
+        }
+        return *this;
+    }
+
+    /// @brief Reads a single value of strongly defined type T
+    /// @tparam T value type, must by default constructible
+    /// @tparam Tag strongtypedef tag
+    /// @param value_opt value where to store data
+    /// @return ref to self
+    template<typename T, typename Tag>
+    BinaryInStream& operator>>(common::types::StrongTypedef<T, Tag>& value) {
+        T data{};
+        *this >> data;
+        value.GetUnderlying() = std::move(data);
+        return *this;
+    }
 
 private:
     StreamT stream_;
@@ -123,6 +163,9 @@ public:
 
     /// @brief dtor
     ~BinaryOutStream();
+
+    /// @brief Check whether the end of file was reached.
+    bool Eof() const;
 
     /// @brief Move assignment operator
     /// @param other other stream
@@ -163,9 +206,33 @@ public:
 
     /// @brief Writes a single chrono::time_point value.
     /// @param time_point time point to store
-    /// @return ref to result
+    /// @return ref to self
     BinaryOutStream& operator<<(
         const std::chrono::time_point<std::chrono::system_clock>& time_point);
+
+    /// @brief Writes a single optional value of type T
+    /// @tparam T value type, must be default constructible to read it afterwards
+    /// @param value_opt std::optional<T> value to write
+    /// @return ref to self
+    template<typename T>
+    BinaryOutStream& operator<<(const std::optional<T>& value_opt) {
+        *this << value_opt.has_value();
+        if (value_opt.has_value()) {
+            *this << value_opt.value();
+        }
+        return *this;
+    }
+
+    /// @brief Writes a single value with strongly defined type T
+    /// @tparam T value type, must be default constructible to read it afterwards
+    /// @tparam Tag StrongTypedef tag
+    /// @param value_opt common::types::StrongTypedef<T> value to write
+    /// @return ref to self
+    template<typename T, typename Tag>
+    BinaryOutStream& operator<<(const common::types::StrongTypedef<T, Tag>& value_opt) {
+        *this << value_opt.GetUnderlying();
+        return *this;
+    }
 
 private:
     StreamT stream_;

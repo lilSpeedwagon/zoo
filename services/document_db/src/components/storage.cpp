@@ -4,13 +4,13 @@
 
 #include <models/exceptions.hpp>
 
+
 namespace documents::components {
 
 namespace {
 
 auto FindDocumentInfo(
-    const std::unordered_map<models::DocumentId, models::DocumentInfoPtr>& storage,
-    models::DocumentId id) {
+    const models::DocumentInfoMap& storage, models::DocumentId id) {
     if (const auto it = storage.find(id);
         it != storage.end()) {
         return it;
@@ -31,21 +31,20 @@ auto FindDocumentPayload(
 
 } // namespace
 
-// Current implementation is an in-memory prototype.
-// TODO: move the storage into a filesystem.
+Storage::Storage() : data_access_mutex_{}, id_counter_{0},
+                     documents_info_{}, payload_cache_{}, sink_("./") {}
 
-Storage::Storage() {
-
+Storage::~Storage() {
+    Unload();
 }
 
-Storage::~Storage() {}
-
-void Storage::Init() {}
+void Storage::Init() {
+    Load();
+}
 
 void Storage::Reset() {
-    boost::lock_guard lock(data_access_mutex_);
-    documents_info_.clear();
-    payload_cache_.clear();
+    Unload();
+    Load();
 }
 
 const char* Storage::Name() const { return kName; };
@@ -94,6 +93,7 @@ models::Document Storage::Add(models::DocumentInput&& input) {
     documents_info_[id] = std::make_shared<models::DocumentInfo>(info);
     payload_cache_[id] = 
         std::make_shared<models::DocumentPayload>(std::move(input.payload));
+    OnDocumentUpdated();
     return models::Document{
         info,          // info
         std::nullopt,  // payload
@@ -120,6 +120,7 @@ models::Document Storage::Update(models::DocumentId id,
         }
         info.updated = std::chrono::system_clock::now();
     }
+    OnDocumentUpdated();
     return models::Document {
         info,           // info
         std::nullopt,   // payload
@@ -136,11 +137,33 @@ models::Document Storage::Delete(models::DocumentId id) {
     };
     documents_info_.erase(info_it);
     payload_cache_.erase(payload_it);
+    OnDocumentUpdated();
     return result;
+}
+
+size_t Storage::Clear() {
+    boost::lock_guard lock(data_access_mutex_);
+    auto count = documents_info_.size();
+    Unload();
+    OnDocumentUpdated();
+    return count;
 }
 
 models::DocumentId Storage::NextId() {
     return models::DocumentId{id_counter_.fetch_add(1, std::memory_order::memory_order_relaxed)};  
+}
+
+void Storage::OnDocumentUpdated() {
+    sink_.Store(documents_info_);
+}
+
+void Storage::Load() {
+    documents_info_ = sink_.LoadMeta();
+}
+
+void Storage::Unload() {
+    documents_info_.clear();
+    payload_cache_.clear();
 }
 
 } // namespace documents::components

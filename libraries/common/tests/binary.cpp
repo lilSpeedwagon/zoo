@@ -1,11 +1,13 @@
 #include <chrono>
 #include <list>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include <catch2/catch.hpp>
 
 #include <common/include/binary.hpp>
+#include <common/include/strong_typedef.hpp>
 
 
 // Tests from this section cause a side-effect:
@@ -186,6 +188,52 @@ TEST_CASE("ChronoIO", "[Binary]") {
         wrapper_in >> result;
         
         CHECK(tp == result);
+    }
+}
+
+TEST_CASE("OptionalIO", "[Binary]") {
+    std::optional<int> int_opt_empty = std::nullopt;
+    std::optional<int> int_opt = 123;
+    std::optional<std::string> str_opt = "str";
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << int_opt_empty << int_opt << str_opt;
+    }
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+        
+        std::optional<int> opt1;
+        std::optional<int> opt2;
+        std::optional<std::string> opt3;
+        wrapper_in >> opt1 >> opt2 >> opt3;
+        
+        CHECK(opt1 == int_opt_empty);
+        CHECK(opt2 == int_opt);
+        CHECK(opt3 == str_opt);
+    }
+}
+
+TEST_CASE("StrongTypedefIO", "[Binary]") {
+    using IntT = common::types::StrongTypedef<int, struct IntTag>;
+    using StrT = common::types::StrongTypedef<std::string, struct StrTag>;
+
+    IntT int_val(123);
+    StrT str_val("str");
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << int_val << str_val;
+    }
+    {
+        common::binary::BinaryInStream wrapper_in(kFileName);
+        
+        IntT st1{};
+        StrT st2{};
+        wrapper_in >> st1 >> st2;
+        
+        CHECK(st1 == int_val);
+        CHECK(st2 == str_val);
     }
 }
 

@@ -10,11 +10,13 @@
 #include <http/include/http_server.hpp>
 
 #include <components/storage.hpp>
+#include <handlers/clear.hpp>
 #include <handlers/create.hpp>
 #include <handlers/delete.hpp>
 #include <handlers/get.hpp>
 #include <handlers/list.hpp>
 #include <handlers/update.hpp>
+
 
 namespace {
 
@@ -57,6 +59,7 @@ int main() {
         auto server_ptr = std::make_shared<http::server::HttpServer>(
             pool.GetContextPtr(), http::consts::kLocalhost, kPort);
         server_ptr->AddListener("/ping", http::Method::get, &http::handlers::handle_ping);
+        server_ptr->AddListener(MakePath("clear"), http::Method::post, &documents::handlers::HandleClear);
         server_ptr->AddListener(MakePath("create"), http::Method::post, &documents::handlers::handle_create);
         server_ptr->AddListener(MakePath("delete"), http::Method::post, &documents::handlers::handle_delete);
         server_ptr->AddListener(MakePath("get"), http::Method::get, &documents::handlers::handle_get);
