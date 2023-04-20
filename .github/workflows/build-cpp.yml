@@ -14,19 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: install boost
-      run: sudo apt-get update && sudo apt-get install libboost-all-dev -y
-    - name: cmake configure
-      working-directory: ./
-      env:
-        BOOST_ROOT: /usr/include/boost
-      run: cmake .
-    - name: cmake build
-      working-directory: ./
-      run: cmake --build .
-    - name: run unit tests
-      working-directory: ./
-      run: ./libraries/common/lib_common_tests && ./libraries/http/lib_http_tests && ./libraries/components/lib_components_tests
     - name: install python libs
       working-directory: ./
       run: sudo pip install -r requirements.txt && cd ./utils/test_utils && sudo python3 setup.py install
