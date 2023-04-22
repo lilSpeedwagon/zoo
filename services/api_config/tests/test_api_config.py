@@ -1,7 +1,7 @@
 
 import pytest
 
-from zootest.mocks import MockAny
+from utils.test_utils.mocks import MockAny
 
 
 def _create_api_config(

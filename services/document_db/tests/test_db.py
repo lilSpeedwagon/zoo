@@ -1,9 +1,6 @@
 
-import pytest
-
-from zootest.mocks import MockAny
-
-from .conftest import DocumentDbService
+from utils.test_utils.mocks import MockAny
+from services.document_db.tests.conftest import DocumentDbService
 
 
 def _create_document(document_db: DocumentDbService, name: str = 'doc', owner: str = 'me',
