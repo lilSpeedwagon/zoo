@@ -1,6 +1,6 @@
 import pytest
 
-from zootest.fixtures import ServiceBase
+from utils.test_utils.fixtures import ServiceBase
 
 
 class DocumentDbService(ServiceBase):

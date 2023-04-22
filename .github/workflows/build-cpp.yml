@@ -16,7 +16,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: install python libs
       working-directory: ./
-      run: sudo pip install -r requirements.txt && cd ./utils/test_utils && sudo python3 setup.py install
+      run: sudo pip install -r requirements.txt
     - name: build and test services
       working-directory: ./
       run: sudo bash ./build_and_test_all.sh

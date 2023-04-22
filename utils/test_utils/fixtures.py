@@ -1,9 +1,11 @@
 from typing import Optional
 import requests
 
+
 class ServiceBase:
-    # Base class for service access fixtures.
-    # Override host/port in derived class.
+    """
+    Base class for service access fixtures. Override host/port in derived class.
+    """
 
     def __init__(self):
         self.host = 'localhost'
@@ -29,6 +31,8 @@ class ServiceBase:
         return requests.post(self.make_uri(self.address, path), json=body)
 
     def reset(self, component_name: Optional[str] = None):
+        """"""
+
         body = {}
         if component_name:
             body['component_name'] = component_name

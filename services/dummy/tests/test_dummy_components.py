@@ -6,6 +6,7 @@ def test_dummy_counter(dummy_service):
         assert(response.status_code == 200)
         assert(response.json() == {'result': i + 1})
 
+
 def test_dummy_dict(dummy_service):
     data = {'key': 'key1', 'value': 'value1'}
     response = dummy_service.post('/dict-add', data)
@@ -32,6 +33,7 @@ def test_dummy_dict(dummy_service):
     response = dummy_service.get('/dict-get?key=unknown')
     assert(response.status_code == 200)
     assert(response.json() == {'value': None})
+
 
 def test_reset_by_name(dummy_service):
     # counter
@@ -61,6 +63,7 @@ def test_reset_by_name(dummy_service):
     assert(response.status_code == 200)
     assert(response.json() == {'value': None})
 
+
 def test_reset_all(dummy_service):
     for i in range(3):
         response = dummy_service.post('/count')
@@ -82,6 +85,7 @@ def test_reset_all(dummy_service):
     response = dummy_service.get('/dict-get?key=key')
     assert(response.status_code == 200)
     assert(response.json() == {'value': None})
+
 
 def test_reset_missing_component(dummy_service):
     name = 'unknown'
