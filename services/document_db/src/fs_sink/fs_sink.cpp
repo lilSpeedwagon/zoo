@@ -4,12 +4,15 @@
 #include <filesystem>
 #include <fstream>
 
+#include <boost/regex.hpp>
+
 #include <common/include/binary.hpp>
 #include <common/include/logging.hpp>
 #include <common/include/format.hpp>
 #include <common/include/utils/errors.hpp>
 
 #include <fs_sink/db_binary.hpp>
+#include <models/exceptions.hpp>
 
 
 namespace documents::fs_sink {
@@ -22,13 +25,16 @@ namespace {
 
 static const std::ios_base::openmode kFileWriteMode = std::ios::binary | std::ios::out;
 static const std::ios_base::openmode kFileReadMode = std::ios::binary | std::ios::in;
+static const std::string kMetaFileName = "meta.ddb";
 static const std::string kMetaPrefix = "META";
+static const std::string kPagePrefix = "PAGE";
+static const std::string kPageFilePrefix = "page_";
+static const std::string kPageFileExtension = ".dp";
+static const boost::regex kPageFileRegex("^page_\d+\.dp$");
+static constexpr const size_t kMaxPageSize = 1024 * 1024 * 4; // 4Mb
 
-// Document index model
-struct DocumentPosition {
-    size_t page_index{};
-    size_t page_offset{};
-};
+static const std::string kFilesystemErrorMsg = "Corrupted files found while loading database";
+
 
 std::filesystem::path GetIndexPath(std::filesystem::path path) {
     path += "/meta.ddb";
@@ -66,10 +72,68 @@ auto OpenMetaFileOut(const std::filesystem::path& path) {
     }
 }
 
+bool IsValidPage(const std::filesystem::path& path) {
+    std::fstream file(path, kFileReadMode);
+    std::string buffer;
+    file.read(buffer.data(), kPagePrefix.size());
+    return buffer != kPageFilePrefix;
+}
+
+size_t GetPageIndex(const std::filesystem::path& path) {
+    const auto stem = path.stem().string();
+    size_t from = kPagePrefix.size();
+    size_t to = stem.find('.', from);
+    if (to == std::string::npos) {
+        LOG_ERROR() << "Cannot obtain page index for file: " << path.string();
+        throw exceptions::FilesystemException(kFilesystemErrorMsg);
+    }
+
+    try {
+        return std::stol(stem.substr(from, to));
+    } catch (const std::logic_error& ex) {
+        LOG_ERROR() << common::format::Format(
+            "Cannot obtain page index for file {}: {}", path.string(), ex.what());
+        throw exceptions::FilesystemException(kFilesystemErrorMsg);
+    }
+}
+
+size_t GetPageSize(const std::filesystem::path& path) {
+    try {
+        return std::filesystem::file_size(path);
+    } catch (const std::filesystem::filesystem_error& ex) {
+        LOG_ERROR() << common::format::Format(
+            "Cannot obtain page size for file {}: {}", path.string(), ex.what());
+        throw exceptions::FilesystemException(kFilesystemErrorMsg);
+    }
+}
+
+std::unordered_map<size_t, FileStorageSink::PageFile> LoadPageFilesMap(const std::filesystem::path& path) {
+    std::unordered_map<size_t, FileStorageSink::PageFile> files_map;
+    for (auto& item : std::filesystem::directory_iterator(path)) {
+        if (std::filesystem::is_directory(item) &&
+            !boost::regex_match(item.path().filename().string(), kPageFileRegex)) {
+            continue;
+        }
+
+        if (!IsValidPage(item.path())) {
+            LOG_ERROR() << item.path().string() << " file is corrupted";
+            throw exceptions::FilesystemException(kFilesystemErrorMsg);
+        }
+
+        const auto index = GetPageIndex(item.path());
+        FileStorageSink::PageFile page{
+            std::move(item.path()),    // path
+            GetPageSize(item.path()),  // size
+        };
+        files_map[index] = std::move(page);
+    }
+    return files_map;
+}
+
 } // namespace
 
 FileStorageSink::FileStorageSink(const std::filesystem::path& path) 
-    : path_(path), meta_path_(GetIndexPath(path_)) {
+    : path_(path), meta_path_(GetIndexPath(path_)), page_index_counter_(0), pages_map_() {
     InitFs();
 }
 
@@ -83,8 +147,6 @@ FileStorageSink& FileStorageSink::operator=(FileStorageSink&& other) {
     Swap(std::move(other));
     return *this;
 }
-
-void FileStorageSink::SyncWithFs() {}
     
 void FileStorageSink::Store(const models::DocumentInfoMap& documents_info_) {
     LOG_INFO() << "Storing updated documents info to FS";
@@ -103,6 +165,40 @@ void FileStorageSink::Store(const models::DocumentInfoMap& documents_info_) {
     // TODO release FS mutex
 
     LOG_INFO() << "Storing completed";
+}
+
+models::DocumentPosition FileStorageSink::Store(const models::DocumentPosition& old_position,
+                                                const models::DocumentPayloadPtr payload_ptr) {
+    LOG_DEBUG() << "Storing payload to " << old_position.page_index << ':' << old_position.page_offset;
+
+    // TODO refactor to functions
+    std::optional<models::DocumentPosition> new_pos = std::nullopt;
+    size_t actual_size = payload_ptr->GetUnderlying().size() + sizeof(size_t); // move to some constexpr
+    for (const auto& [index, page] : pages_map_) {
+        if (page.size + actual_size <= kMaxPageSize) {
+            new_pos = models::DocumentPosition{
+                index,      // page_index
+                page.size,  // page_offset
+            };
+            break;
+        }
+    }
+
+    if (!new_pos.has_value()) {
+        const auto new_index = ++page_index_counter_;
+        new_pos = models::DocumentPosition{
+            new_index,  // page_index
+            0,          // page_offset
+        };
+    }
+
+    // TODO 
+    // append payload
+    // set is_active=False for the old payload
+    // cleanup old file if needed
+    // return new position
+
+    return {};
 }
 
 models::DocumentInfoMap FileStorageSink::LoadMeta() {
@@ -136,14 +232,25 @@ models::DocumentInfoMap FileStorageSink::LoadMeta() {
     return result;
 }
 
+models::DocumentPayloadPtr FileStorageSink::LoadPayload(const models::DocumentId& document_id) {
+    // TODO take position
+    // find document
+}
+
 void FileStorageSink::InitFs() {
     LOG_INFO() << "Init document DB file system storage at "
                << meta_path_.generic_string();
 
     const auto is_index_exists = std::filesystem::exists(meta_path_);
     if (!is_index_exists) {
-        // touch index file
-        OpenMetaFileOut(meta_path_);
+        Store({});  // touch index file
+    }
+
+    pages_map_ = LoadPageFilesMap(path_);
+    for (const auto& [index, _] : pages_map_) {
+        if (index > page_index_counter_) {
+            page_index_counter_ = index;
+        }
     }
 }
 

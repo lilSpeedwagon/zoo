@@ -29,9 +29,14 @@ public:
 
 class BadRequestException : public Exception {
 public:
-    BadRequestException(const std::string& argument_name) 
+    BadRequestException(const std::string& argument_name)
         : Exception(common::format::Format(
             "Missing required argument \'{}\'", argument_name)) {}
+};
+
+class FilesystemException : public Exception {
+public:
+    FilesystemException(const std::string& msg) : Exception(msg) {}
 };
 
 } // namespace documents::exceptions
