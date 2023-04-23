@@ -87,6 +87,7 @@ models::Document Storage::Add(models::DocumentInput&& input) {
         std::move(input.name),            // name
         std::move(input.owner),           // owner
         std::move(input.namespace_name),  // namespace_name
+        std::nullopt,                     // position
     };
     
     boost::lock_guard lock(data_access_mutex_);

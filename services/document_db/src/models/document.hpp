@@ -31,6 +31,13 @@ struct DocumentUpdateInput {
     std::optional<DocumentPayload> payload{};
 };
 
+/// @brief Document index
+struct DocumentPosition {
+    size_t page_index{};
+    size_t page_offset{};
+};
+
+/// @brief Document metadata
 struct DocumentInfo {
     DocumentId id{};
     std::chrono::time_point<std::chrono::system_clock> created{};
@@ -38,6 +45,7 @@ struct DocumentInfo {
     std::string name{};
     std::string owner{};
     std::string namespace_name{};
+    std::optional<DocumentPosition> position;
 };
 using DocumentInfoPtr = std::shared_ptr<DocumentInfo>;
 
