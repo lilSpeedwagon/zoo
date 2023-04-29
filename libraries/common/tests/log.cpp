@@ -27,6 +27,7 @@ public:
     LoggerFixture() {
         auto& logger = common::logging::LoggerFrontend::GetMainLogger();
         logger.SetLevelFilter(common::logging::LogLevel::Trace);
+        logger.SetFlushLevel(common::logging::LogLevel::Error);
         logger.ResetSinks();
         sink_ptr = std::make_shared<common::logging::SinkString>();
         logger.AddSink(sink_ptr);
@@ -45,6 +46,14 @@ TEST_CASE_METHOD(LoggerFixture, "Log without flush", "[Log]") {
 
     LOG_INFO() << "data";
     CheckSink(sink_ptr, "");
+}
+
+TEST_CASE_METHOD(LoggerFixture, "Log with force flush", "[Log]") {
+    auto& logger = common::logging::LoggerFrontend::GetMainLogger();
+    logger.SetBufferMaxSize(10);
+
+    LOG_ERROR() << "error msg";
+    CheckSink(sink_ptr, "ERROR\t[time]\terror msg\n");
 }
 
 TEST_CASE_METHOD(LoggerFixture, "Log", "[Log]") {

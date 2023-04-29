@@ -55,6 +55,7 @@ namespace logging {
 void from_json(const json::json& data, logging::LogSettings& config) {
     auto flush_delay = GetOrDefault<int>(data, "flush_delay", 100);
     auto log_level = GetOrDefault<std::string>(data, "log_level", "Debug");
+    auto flush_level = GetOrDefault<std::string>(data, "log_level", "Error");
     auto buffer_max_size = GetOrDefault<int>(data, "buffer_max_size", 1024);
     auto log_to_stdout = GetOrDefault<bool>(data, "log_to_stdout", true);
     auto path = GetOrDefault<std::string>(data, "path", ".\\");
@@ -63,6 +64,7 @@ void from_json(const json::json& data, logging::LogSettings& config) {
 
     config.flush_delay = static_cast<std::chrono::milliseconds>(flush_delay);
     config.log_level = ParseLogLevel(log_level);
+    config.flush_level = ParseLogLevel(flush_level);
     config.buffer_max_size = static_cast<size_t>(buffer_max_size);
     config.log_to_stdout = log_to_stdout;
     config.path = std::move(path);
