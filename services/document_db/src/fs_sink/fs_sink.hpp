@@ -28,6 +28,9 @@ public:
 
     FileStorageSink& operator=(FileStorageSink&& other);
 
+    /// @brief Init file system manager.
+    void Init();
+
     /// @brief stores document info index to FS (should be process-safe)
     void Store(const models::DocumentInfoMap& document_infos);
 
@@ -35,14 +38,14 @@ public:
     /// @param current_position current DocumentPosition
     /// @param payload_ptr a pointer to DocumentPayload to store
     /// @return new DocumentPosition where the document is stored
-    models::DocumentPosition Store(const models::DocumentPosition& current_position,
+    models::DocumentPosition Store(const std::optional<models::DocumentPosition>& old_position_opt,
                                    const models::DocumentPayloadPtr payload_ptr);
 
     /// @brief Loads meta data from FS
     models::DocumentInfoMap LoadMeta();
 
     /// @brief Loads document payload by document id
-    models::DocumentPayloadPtr LoadPayload(const models::DocumentId& document_id);
+    models::DocumentPayloadPtr LoadPayload(const models::DocumentPosition& position);
 
 private:
 

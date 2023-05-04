@@ -65,17 +65,17 @@ private:
     models::DocumentId NextId();
     models::DocumentPayloadPtr FetchPayload(models::DocumentId id);
     void OnDocumentUpdated();
+    void OnDocumentUpdated(const models::DocumentInfoPtr info_ptr, const models::DocumentPayloadPtr& payload_ptr);
     void Load();
     void Unload();
+    void RestoreIdCounter();
     
     // shared mutex implements multiple readers, single writer concept
     boost::upgrade_mutex data_access_mutex_;
     std::atomic<size_t> id_counter_;
     models::DocumentInfoMap documents_info_;
 
-    // for now it is in-memory data storage
     // TODO store payloads in FS, apply some LRU cache
-    std::unordered_map<models::DocumentId, models::DocumentPayloadPtr> payload_cache_;
     fs_sink::FileStorageSink sink_;
 };
 

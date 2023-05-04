@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(document_db_service)
 set (CMAKE_CXX_STANDARD 17)
 
-find_package(Boost COMPONENTS thread REQUIRED)
+find_package(Boost COMPONENTS regex thread REQUIRED)
 
 # setup libraries headers
 set(LIBS_DIR ../../libraries)
@@ -39,10 +39,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 # link libs
-target_link_libraries(${PROJECT_NAME} lib_http)
-target_link_libraries(${PROJECT_NAME} lib_common)
-target_link_libraries(${PROJECT_NAME} lib_components)
-target_link_libraries(${PROJECT_NAME} Boost::thread)
+target_link_libraries(${PROJECT_NAME}
+    lib_common
+    lib_http
+    lib_components
+    Boost::thread
+    Boost::regex
+)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
     -pthread
