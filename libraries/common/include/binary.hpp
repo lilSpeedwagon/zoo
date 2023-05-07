@@ -164,7 +164,8 @@ public:
 
     /// @brief ctor
     /// @param path wrappable file path 
-    BinaryOutStream(const std::filesystem::path& path);
+    /// @param truncate truncates file content if set to true
+    BinaryOutStream(const std::filesystem::path& path, bool truncate = false);
 
     /// @brief ctor
     /// @param stream already opened file to wrap

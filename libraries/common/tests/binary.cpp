@@ -291,4 +291,24 @@ TEST_CASE_METHOD(BinaryTestFixture, "Rewrite", "[Binary]") {
     CHECK(result == str2);
 }
 
+TEST_CASE_METHOD(BinaryTestFixture, "Truncate", "[Binary]") {
+    std::string str1 = "Halle";
+    std::string str2 = "Hello";
+    
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << str1;
+    }
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName, true);
+        wrapper_out << str2;
+    }
+
+    common::binary::BinaryInStream wrapper_in(kFileName);
+    std::string result;
+    wrapper_in >> result;
+    CHECK(result == str2);
+}
+
 } // namespace common::tests::binary

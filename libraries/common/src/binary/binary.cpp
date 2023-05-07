@@ -92,9 +92,13 @@ void BinaryInStream::Init() {
     Seek(BinaryStreamPosition::BEGIN);
 }
 
-BinaryOutStream::BinaryOutStream(const std::filesystem::path& path) {
+BinaryOutStream::BinaryOutStream(const std::filesystem::path& path, bool truncate) {
     EnsureExist(path);
-    stream_ = StreamT(path, kFileWriteMode);
+    auto open_mode = kFileWriteMode;
+    if (truncate) {
+        open_mode |= std::ios::trunc;
+    }
+    stream_ = StreamT(path, open_mode);
     Init();
 }
 
