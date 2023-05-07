@@ -156,12 +156,18 @@ void Storage::OnDocumentUpdated() {
 }
 
 void Storage::OnDocumentUpdated(const models::DocumentInfoPtr info_ptr, const models::DocumentPayloadPtr& payload_ptr) {
-    
-    // on update ?
-    // on delete ?
     auto position = sink_.Store(info_ptr->position, payload_ptr);
     info_ptr->position = std::move(position);
     OnDocumentUpdated();
+}
+
+void Storage::OnDocumentDeleted(const models::DocumentInfoPtr info_ptr) {
+    if (info_ptr->position.has_value()) {
+        sink_.Delete(info_ptr->position.value());
+    } else {
+        // TODO position always must present
+        throw std::logic_error("missing document position on delete");
+    }
 }
 
 void Storage::Load() {
@@ -172,6 +178,7 @@ void Storage::Load() {
 
 void Storage::Unload() {
     documents_info_.clear();
+    sink_.Reset();
 }
 
 void Storage::RestoreIdCounter() {

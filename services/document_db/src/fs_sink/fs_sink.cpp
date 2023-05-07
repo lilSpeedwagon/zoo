@@ -164,9 +164,15 @@ FileStorageSink& FileStorageSink::operator=(FileStorageSink&& other) {
 void FileStorageSink::Init() {
     InitFs();
 }
+
+void FileStorageSink::Reset() {
+    pages_map_.clear();
+    page_index_counter_ = 0;
+    InitFs();
+}
     
 void FileStorageSink::Store(const models::DocumentInfoMap& documents_info) {
-    LOG_INFO() << "Storing updated documents info to FS";
+    LOG_DEBUG() << "Storing updated documents info to FS";
 
     // TODO acquire FS mutex
     // TODO start FS transaction
@@ -181,7 +187,7 @@ void FileStorageSink::Store(const models::DocumentInfoMap& documents_info) {
     // TODO commit/rollback FS transaction
     // TODO release FS mutex
 
-    LOG_INFO() << "Storing completed";
+    LOG_DEBUG() << "Storing completed";
 }
 
 models::DocumentPosition FileStorageSink::Store(const std::optional<models::DocumentPosition>& old_position_opt,
@@ -231,7 +237,6 @@ models::DocumentPosition FileStorageSink::Store(const std::optional<models::Docu
             old_file.Seek(old_position_opt.value().page_offset);
             old_file << old_pos_is_active;
         }
-        common::binary::BinaryOutStream old_file(path);
     }
     
     // TODO old file cleanup
@@ -241,6 +246,15 @@ models::DocumentPosition FileStorageSink::Store(const std::optional<models::Docu
 
     LOG_DEBUG() << "Payload is stored to " << new_pos.value().page_index << ":" << new_pos.value().page_offset;    
     return new_pos.value();
+}
+
+void FileStorageSink::Delete(const models::DocumentPosition& position) {
+    const auto path = GetPagePath(path_, position.page_index);
+    common::binary::BinaryOutStream file(path);
+
+    const bool is_active = false;
+    file.Seek(position.page_offset);
+    file << is_active;
 }
 
 models::DocumentInfoMap FileStorageSink::LoadMeta() {

@@ -31,6 +31,9 @@ public:
     /// @brief Init file system manager.
     void Init();
 
+    /// @brief Reset manager state.
+    void Reset();
+
     /// @brief stores document info index to FS (should be process-safe)
     void Store(const models::DocumentInfoMap& document_infos);
 
@@ -40,6 +43,10 @@ public:
     /// @return new DocumentPosition where the document is stored
     models::DocumentPosition Store(const std::optional<models::DocumentPosition>& old_position_opt,
                                    const models::DocumentPayloadPtr payload_ptr);
+
+    /// @brief Deletes document payload.
+    /// @param position document payload position
+    void Delete(const models::DocumentPosition& position);
 
     /// @brief Loads meta data from FS
     models::DocumentInfoMap LoadMeta();

@@ -66,6 +66,7 @@ private:
     models::DocumentPayloadPtr FetchPayload(models::DocumentId id);
     void OnDocumentUpdated();
     void OnDocumentUpdated(const models::DocumentInfoPtr info_ptr, const models::DocumentPayloadPtr& payload_ptr);
+    void OnDocumentDeleted(const models::DocumentInfoPtr info_ptr);
     void Load();
     void Unload();
     void RestoreIdCounter();
