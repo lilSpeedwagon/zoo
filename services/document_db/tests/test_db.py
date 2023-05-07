@@ -266,20 +266,20 @@ def test_delete_twice(document_db: DocumentDbService):
     assert(response.text == f'Document with id=\'{document["id"]}\' not found')
 
 
+def test_delete_and_fetch(document_db: DocumentDbService):
+    document = _create_document(document_db)
+    response = document_db.post(f'/api/v1/documents/delete',
+                                body={'id': document['id']})
+    assert(response.status_code == 200)
+    assert(response.json() == document)
+    
+    response = document_db.get(f'/api/v1/documents/get?id={document["id"]}')
+    assert(response.status_code == 404)
+    assert(response.text == f'Document with id=\'{document["id"]}\' not found')
+
+
 def test_clear(document_db: DocumentDbService):
     documents = [_create_document(document_db) for i in range(3)]
     response = document_db.post('/api/v1/documents/clear')
     assert(response.status_code == 200)
     assert(response.json() == {'items_deleted': len(documents)})
-
-
-def test_reload_from_fs(document_db: DocumentDbService):
-    documents = [_create_document(document_db) for i in range(3)]
-    
-    # reset and make sure that documents were reloaded from FS
-    reset_response = document_db.reset()
-    assert reset_response.status_code == 200
-
-    response = response = document_db.get(f'/api/v1/documents/list')
-    assert response.status_code == 200
-    assert response.json() == {'items': documents}
