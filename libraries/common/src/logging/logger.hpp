@@ -15,6 +15,7 @@ public:
 
     void Log(LogMsg&& msg);
     void SetLevelFilter(LogLevel level);
+    void SetFlushLevel(LogLevel level);
     void Flush();
     void Clear();
 
@@ -33,6 +34,7 @@ private:
     std::recursive_mutex buffer_mutex_;
     std::queue<LogMsg> buffer_;
     LogLevel level_filter_;
+    LogLevel flush_level_;
     size_t msg_max_size_;
 };
 

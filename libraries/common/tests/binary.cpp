@@ -23,9 +23,17 @@ void CheckString(const std::string& str, const char* expected) {
     CHECK(str == std::string(expected));
 }
 
+class BinaryTestFixture {
+public:
+    BinaryTestFixture() {
+        // cleanup temp file if exist
+        auto is_deleted = std::filesystem::remove(std::filesystem::path(kFileName));
+    }
+};
+
 } // namespace
 
-TEST_CASE("StringsIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "StringsIO", "[Binary]") {
     {
         common::binary::BinaryOutStream wrapper_out(kFileName);
         wrapper_out << "hello";
@@ -44,7 +52,7 @@ TEST_CASE("StringsIO", "[Binary]") {
     CheckString(s2, "world");
 }
 
-TEST_CASE("IntegersIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "IntegersIO", "[Binary]") {
     int signed_int = 123;
     long signed_long = 12356789;
     char signed_char = 127;
@@ -95,7 +103,7 @@ TEST_CASE("IntegersIO", "[Binary]") {
 }
 
 
-TEST_CASE("FloatingPointIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "FloatingPointIO", "[Binary]") {
     float float_positive = 123.456f;
     float float_negative = -123.456f;
     double double_positive = 123.456789;
@@ -123,7 +131,7 @@ TEST_CASE("FloatingPointIO", "[Binary]") {
     }
 }
 
-TEST_CASE("BooleanIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "BooleanIO", "[Binary]") {
     {
         common::binary::BinaryOutStream wrapper_out(kFileName);
         wrapper_out << true;
@@ -142,7 +150,7 @@ TEST_CASE("BooleanIO", "[Binary]") {
     CHECK(b2 == false);
 }
 
-TEST_CASE("VectorIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "VectorIO", "[Binary]") {
     std::vector<int> numbers = {1, 2, 3};
 
     {
@@ -158,7 +166,7 @@ TEST_CASE("VectorIO", "[Binary]") {
     }
 }
 
-TEST_CASE("ListIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "ListIO", "[Binary]") {
     std::list<int> numbers = {1, 2, 3};
 
     {
@@ -175,7 +183,7 @@ TEST_CASE("ListIO", "[Binary]") {
 }
 
 
-TEST_CASE("ChronoIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "ChronoIO", "[Binary]") {
     std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
 
     {
@@ -191,7 +199,7 @@ TEST_CASE("ChronoIO", "[Binary]") {
     }
 }
 
-TEST_CASE("OptionalIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "OptionalIO", "[Binary]") {
     std::optional<int> int_opt_empty = std::nullopt;
     std::optional<int> int_opt = 123;
     std::optional<std::string> str_opt = "str";
@@ -214,7 +222,7 @@ TEST_CASE("OptionalIO", "[Binary]") {
     }
 }
 
-TEST_CASE("StrongTypedefIO", "[Binary]") {
+TEST_CASE_METHOD(BinaryTestFixture, "StrongTypedefIO", "[Binary]") {
     using IntT = common::types::StrongTypedef<int, struct IntTag>;
     using StrT = common::types::StrongTypedef<std::string, struct StrTag>;
 
@@ -235,6 +243,72 @@ TEST_CASE("StrongTypedefIO", "[Binary]") {
         CHECK(st1 == int_val);
         CHECK(st2 == str_val);
     }
+}
+
+TEST_CASE_METHOD(BinaryTestFixture, "SequentalWrite", "[Binary]") {
+    std::vector<std::string> data = {
+        "Hello ",
+        "world",
+        "!!!",
+    };
+
+    for (const auto& item : data) {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out.Seek(common::binary::BinaryStreamPosition::END);
+        wrapper_out << item;
+    }
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+    }
+
+    common::binary::BinaryInStream wrapper_in(kFileName);
+    for (const auto& item : data) {
+        std::string str;
+        wrapper_in >> str;
+        CHECK(str == item);
+    }
+}
+
+TEST_CASE_METHOD(BinaryTestFixture, "Rewrite", "[Binary]") {
+    std::string str1 = "Halle";
+    std::string str2 = "Hello";
+    
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << str1;
+    }
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out.Seek(common::binary::BinaryStreamPosition::BEGIN);
+        wrapper_out << str2;
+    }
+
+    common::binary::BinaryInStream wrapper_in(kFileName);
+    std::string result;
+    wrapper_in >> result;
+    CHECK(result == str2);
+}
+
+TEST_CASE_METHOD(BinaryTestFixture, "Truncate", "[Binary]") {
+    std::string str1 = "Halle";
+    std::string str2 = "Hello";
+    
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName);
+        wrapper_out << str1;
+    }
+
+    {
+        common::binary::BinaryOutStream wrapper_out(kFileName, true);
+        wrapper_out << str2;
+    }
+
+    common::binary::BinaryInStream wrapper_in(kFileName);
+    std::string result;
+    wrapper_in >> result;
+    CHECK(result == str2);
 }
 
 } // namespace common::tests::binary

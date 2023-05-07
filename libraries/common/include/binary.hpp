@@ -17,6 +17,11 @@ namespace common::binary {
 
 using BinaryByteT = char;
 
+enum class BinaryStreamPosition {
+    BEGIN = 0,
+    END = 1,
+};
+
 /// @class Raised when trying to read binary file after EOF.
 class EofException : public std::runtime_error {
 public:
@@ -49,6 +54,12 @@ public:
 
     /// @brief Check whether the end of file was reached.
     bool Eof() const;
+
+    /// @brief Seek the specified position in file
+    void Seek(size_t position);
+
+    /// @brief Seek the special position in file
+    void Seek(BinaryStreamPosition position);
 
     /// @brief Move assignment operator
     /// @param other other stream
@@ -137,6 +148,8 @@ public:
     }
 
 private:
+    void Init();
+
     StreamT stream_;
 };
 
@@ -151,7 +164,8 @@ public:
 
     /// @brief ctor
     /// @param path wrappable file path 
-    BinaryOutStream(const std::filesystem::path& path);
+    /// @param truncate truncates file content if set to true
+    BinaryOutStream(const std::filesystem::path& path, bool truncate = false);
 
     /// @brief ctor
     /// @param stream already opened file to wrap
@@ -166,6 +180,12 @@ public:
 
     /// @brief Check whether the end of file was reached.
     bool Eof() const;
+
+    /// @brief Seek the specified position in file
+    void Seek(size_t position);
+
+    /// @brief Seek the special position in file
+    void Seek(BinaryStreamPosition position);
 
     /// @brief Move assignment operator
     /// @param other other stream
@@ -235,6 +255,8 @@ public:
     }
 
 private:
+    void Init();
+
     StreamT stream_;
 };
 

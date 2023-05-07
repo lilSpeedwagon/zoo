@@ -6,6 +6,14 @@ then
     exit 1
 fi
 
+./build_service.sh ${service}
+build_result=$?
+if (test ${build_result} != 0)
+then
+    echo 'Build failed'
+    exit ${build_result}
+fi
+
 container_id=$(docker run --rm -d --network=host ${service}_service)
 if [ -z ${container_id} ]
 then

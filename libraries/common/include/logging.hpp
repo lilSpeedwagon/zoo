@@ -81,6 +81,7 @@ private:
 struct LogSettings {
     std::chrono::milliseconds flush_delay = std::chrono::milliseconds(100);
     LogLevel log_level = LogLevel::Debug;
+    LogLevel flush_level = LogLevel::Error;
     size_t buffer_max_size = 1024;
     bool log_to_stdout = true;
     std::string path = "./";

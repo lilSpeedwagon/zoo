@@ -51,9 +51,10 @@ Logger::Logger() {
 }
 
 void Logger::Log(LogMsg&& msg) {
+    const bool flush = msg.level >= flush_level_;
     std::lock_guard lock(buffer_mutex_);
     buffer_.push(std::move(msg));
-    if (buffer_.size() > buffer_max_size_) {
+    if (flush || buffer_.size() > buffer_max_size_) {
         Flush();
     }
 }
@@ -94,6 +95,10 @@ void Logger::Clear() {
 
 void Logger::SetLevelFilter(LogLevel level) {
     level_filter_ = level;
+}
+
+void Logger::SetFlushLevel(LogLevel level) {
+    flush_level_ = level;
 }
 
 void Logger::AddSink(const LoggerSinkPtr sink) {
