@@ -9,7 +9,6 @@
 #include <common/include/binary.hpp>
 #include <common/include/logging.hpp>
 #include <common/include/format.hpp>
-#include <common/include/utils/errors.hpp>
 
 #include <fs_sink/db_binary.hpp>
 #include <models/exceptions.hpp>
@@ -43,19 +42,9 @@ std::filesystem::path GetIndexPath(std::filesystem::path path) {
     return path;
 }
 
-template<typename T>
-void CheckStream(const T& stream) {
-    if (!stream.is_open() || !stream.good()) {
-        throw std::runtime_error(common::format::Format(
-            "Cannot open document_db index file: {}",
-            common::utils::errors::GetLastError()));
-    }
-}
-
 auto OpenMetaFileIn(const std::filesystem::path& path) {
     try {
-        std::ifstream stream(path, kFileReadMode);
-        return common::binary::BinaryInStream(std::move(stream));
+        return common::binary::BinaryInStream(path);
     } catch (const std::runtime_error& ex) {
         throw std::runtime_error(common::format::Format(
             "Cannot open document_db index file {}: {}",
@@ -65,8 +54,7 @@ auto OpenMetaFileIn(const std::filesystem::path& path) {
 
 auto OpenMetaFileOut(const std::filesystem::path& path) {
     try {
-        std::ofstream stream(path, kFileWriteMode);
-        return common::binary::BinaryOutStream(std::move(stream));
+        return common::binary::BinaryOutStream(path, true);
     } catch (const std::runtime_error& ex) {
         throw std::runtime_error(common::format::Format(
             "Cannot open document_db index file {}: {}",
@@ -192,60 +180,43 @@ void FileStorageSink::Store(const models::DocumentInfoMap& documents_info) {
 
 models::DocumentPosition FileStorageSink::Store(const std::optional<models::DocumentPosition>& old_position_opt,
                                                 const models::DocumentPayloadPtr payload_ptr) {
-    // TODO refactor to functions
     bool is_new_page = false;
     size_t actual_size = kPayloadPrefixSize + payload_ptr->GetUnderlying().size();
-    std::optional<models::DocumentPosition> new_pos = FindAvailablePosition(pages_map_, actual_size);
-    if (!new_pos.has_value()) {
+    std::optional<models::DocumentPosition> new_position_opt = FindAvailablePosition(pages_map_, actual_size);
+    if (!new_position_opt.has_value()) {
         is_new_page = true;
         const auto new_index = ++page_index_counter_;
-        new_pos = models::DocumentPosition{
+        new_position_opt = models::DocumentPosition{
             new_index,           // page_index
             kPagePrefix.size(),  // page_offset
         };
         LOG_DEBUG() << "No suitable page found, creating new with index " << new_index;
     }
 
-    const auto path = GetPagePath(path_, new_pos.value().page_index);
-    auto size_diff = actual_size;
-    common::binary::BinaryOutStream file(path);
-    if (is_new_page) {
-        file << kPagePrefix;
-        size_diff += kPagePrefix.size();
-        pages_map_[new_pos.value().page_index] = PageFile{
-            path,       // path
-            size_diff,  // size
-        };
-    } else {
-        pages_map_[new_pos.value().page_index].size += size_diff;
-    }
-
-    const bool is_active = true;
-    file.Seek(new_pos.value().page_offset);
-    file << is_active;
-    file << *payload_ptr;
+    auto& new_position = new_position_opt.value();
+    auto page_file = WritePayload(new_position, is_new_page, actual_size, payload_ptr);
 
     // disable old payload
     if (old_position_opt.has_value()) {
         const bool old_pos_is_active = false;
-        if (old_position_opt.value().page_index == new_pos.value().page_index) {
-            file.Seek(old_position_opt.value().page_offset);
-            file << old_pos_is_active;
+        if (old_position_opt.value().page_index == new_position.page_index) {
+            page_file.Seek(old_position_opt.value().page_offset);
+            page_file << old_pos_is_active;
         } else {
             const auto old_file_path = GetPagePath(path_, old_position_opt.value().page_index);
             common::binary::BinaryOutStream old_file(old_file_path);
             old_file.Seek(old_position_opt.value().page_offset);
             old_file << old_pos_is_active;
         }
-    }
-    
-    // TODO old file cleanup
-    // need to store number of active file for page
-    // inc / dec on every payload storage
-    // read all files on sync (only flags)
 
-    LOG_DEBUG() << "Payload is stored to " << new_pos.value().page_index << ":" << new_pos.value().page_offset;    
-    return new_pos.value();
+        // TODO old file cleanup
+        // need to store number of active file for page
+        // inc / dec on every payload storage
+        // read all files on sync (only flags)
+    }
+
+    LOG_DEBUG() << "Payload is stored to " << new_position.page_index << ":" << new_position.page_offset;    
+    return new_position;
 }
 
 void FileStorageSink::Delete(const models::DocumentPosition& position) {
@@ -259,13 +230,14 @@ void FileStorageSink::Delete(const models::DocumentPosition& position) {
 
 models::DocumentInfoMap FileStorageSink::LoadMeta() {
     LOG_INFO() << "Loading documents info from FS";
-
     auto stream = OpenMetaFileIn(meta_path_);
 
     std::string prefix{};
     try {
         stream >> prefix;
-    } catch (const std::runtime_error& ex) {}
+    } catch (const std::runtime_error& ex) {
+        LOG_WARNING() << "Prefix read error: " << ex.what();
+    }
     if (prefix.empty() && stream.Eof()) {
         LOG_DEBUG() << "Meta data is empty";
         return models::DocumentInfoMap{};
@@ -320,6 +292,32 @@ void FileStorageSink::InitFs() {
             page_index_counter_ = index;
         }
     }
+}
+
+common::binary::BinaryOutStream FileStorageSink::WritePayload(
+    const models::DocumentPosition& position, bool is_new_page, size_t payload_size,
+    models::DocumentPayloadPtr payload_ptr) { 
+
+    const auto path = GetPagePath(path_, position.page_index);
+    auto size_diff = payload_size;
+    common::binary::BinaryOutStream file(path);
+    if (is_new_page) {
+        file << kPagePrefix;
+        size_diff += kPagePrefix.size();
+        pages_map_[position.page_index] = PageFile{
+            path,       // path
+            size_diff,  // size
+        };
+    } else {
+        pages_map_[position.page_index].size += size_diff;
+    }
+
+    const bool is_active = true;
+    file.Seek(position.page_offset);
+    file << is_active;
+    file << *payload_ptr;
+
+    return file;
 }
 
 void FileStorageSink::Swap(FileStorageSink&& other) {

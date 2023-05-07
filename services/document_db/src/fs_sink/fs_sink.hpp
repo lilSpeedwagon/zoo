@@ -6,7 +6,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include <common/include/logging.hpp>
+#include <common/include/binary.hpp>
 
 #include <models/document.hpp>
 
@@ -59,7 +59,9 @@ private:
     /// @brief inits FS files in the current directory
     void InitFs();
 
-    models::DocumentPosition FindNewPosition(const std::filesystem::path& path, size_t payload_size);
+    common::binary::BinaryOutStream WritePayload(
+        const models::DocumentPosition& position, bool is_new_page, size_t payload_size,
+        models::DocumentPayloadPtr payload_ptr);
 
     void Swap(FileStorageSink&& other);
     
