@@ -217,12 +217,27 @@ public:
             *this << item;
         }
         return *this;
-    }
+    } 
     
-    /// @brief Writes a single formatted string.
+    /// @brief Writes a single formatted string or string_view. Note: this method has no analogue for reading operation,
+    /// since std::string_view is not a dynamic container. Consider to use read operation with std::string.
+    /// @tparam T string type
     /// @param str string to store
     /// @return ref to self
-    BinaryOutStream& operator<<(const std::string& str);
+    template<typename T,
+             typename std::enable_if<std::is_same<T, std::string>::value ||
+                                     std::is_same<T, std::string_view>::value, bool>::type = true>
+    BinaryOutStream& operator<<(const T& str) {
+        *this << str.size();
+        stream_.write(reinterpret_cast<const BinaryByteT*>(str.data()), str.size());
+        return *this;
+    }
+
+    /// @brief Writes a null-formatted string. Note: this method has no analogue for reading operation,
+    /// since char* is not a safe way to control data buffer. Consider to use read operation with std::string.
+    /// @param str pointer to a null-terminated sequence of characters
+    /// @return ref to self
+    BinaryOutStream& operator<<(const char* str);
 
     /// @brief Writes a single chrono::time_point value.
     /// @param time_point time point to store

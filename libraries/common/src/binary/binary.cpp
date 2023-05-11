@@ -1,5 +1,7 @@
 #include <binary.hpp>
 
+#include <cstring>
+
 #include <common/include/format.hpp>
 
 
@@ -140,17 +142,18 @@ BinaryOutStream& BinaryOutStream::operator=(BinaryOutStream&& other) {
     return *this;
 }
 
-BinaryOutStream& BinaryOutStream::operator<<(const std::string& str) {
-    *this << str.size();
-    stream_.write(reinterpret_cast<const BinaryByteT*>(str.data()), str.size());
-    return *this;
-}
-
 BinaryOutStream& BinaryOutStream::operator<<(
     const std::chrono::time_point<std::chrono::system_clock>& time_point) {
     const auto count = std::chrono::duration_cast<std::chrono::nanoseconds>(
         time_point.time_since_epoch()).count();
     *this << count;
+    return *this;
+}
+
+BinaryOutStream& BinaryOutStream::operator<<(const char* str) {
+    const size_t size = strlen(str);
+    *this << size;
+    stream_.write(reinterpret_cast<const BinaryByteT*>(str), size);
     return *this;
 }
 
