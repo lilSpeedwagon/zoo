@@ -38,9 +38,9 @@ std::filesystem::path GetIndexPath(std::filesystem::path path) {
 auto OpenMetaFileIn(const std::filesystem::path& path) {
     try {
         return common::binary::BinaryInStream(path);
-    } catch (const std::runtime_error& ex) {
-        throw std::runtime_error(common::format::Format(
-            "Cannot open document_db index file {}: {}",
+    } catch (const std::ios_base::failure& ex) {
+        throw exceptions::FilesystemException(common::format::Format(
+            "Cannot open index file {}: {}",
             path.string(), ex.what()));
     }
 }
@@ -48,9 +48,9 @@ auto OpenMetaFileIn(const std::filesystem::path& path) {
 auto OpenMetaFileOut(const std::filesystem::path& path) {
     try {
         return common::binary::BinaryOutStream(path, true);
-    } catch (const std::runtime_error& ex) {
-        throw std::runtime_error(common::format::Format(
-            "Cannot open document_db index file {}: {}",
+    } catch (const std::ios_base::failure& ex) {
+        throw exceptions::FilesystemException(common::format::Format(
+            "Cannot open index file {}: {}",
             path.string(), ex.what()));
     }
 }
@@ -172,35 +172,38 @@ void FileStorageSink::Delete(const models::DocumentPosition& position) {
 
 models::DocumentInfoMap FileStorageSink::LoadMeta() {
     LOG_INFO() << "Loading documents info from FS";
-    auto stream = OpenMetaFileIn(meta_path_);
 
-    std::string prefix{};
     try {
+        auto stream = OpenMetaFileIn(meta_path_);
+
+        std::string prefix{};
         stream >> prefix;
-    } catch (const std::runtime_error& ex) {
-        LOG_WARNING() << "Prefix read error: " << ex.what();
-    }
-    if (prefix.empty() && stream.Eof()) {
-        LOG_DEBUG() << "Meta data is empty";
-        return models::DocumentInfoMap{};
-    }
+        if (prefix.empty() && stream.Eof()) {
+            LOG_DEBUG() << "Meta data is empty";
+            return models::DocumentInfoMap{};
+        }
 
-    if (prefix != kMetaPrefix) {
-        throw std::runtime_error(
-            common::format::Format("Invalid meta data prefix: {}", prefix));
-    }
+        if (prefix != kMetaPrefix) {
+            LOG_ERROR() << common::format::Format("Invalid meta data prefix: {}", prefix);
+            throw exceptions::FilesystemException();
+        }
 
-    size_t count{};
-    stream >> count;
-    LOG_DEBUG() << count << " document info entries found";
-    models::DocumentInfoMap result{};
-    for (size_t i = 0; i < count; i++) {
-        models::DocumentInfo document_info{};
-        stream >> document_info;
-        const auto id = document_info.id;
-        result[id] = std::make_shared<models::DocumentInfo>(std::move(document_info));
+        size_t count{};
+        stream >> count;
+        LOG_DEBUG() << count << " document info entries found";
+        models::DocumentInfoMap result{};
+        for (size_t i = 0; i < count; i++) {
+            models::DocumentInfo document_info{};
+            stream >> document_info;
+            const auto id = document_info.id;
+            result[id] = std::make_shared<models::DocumentInfo>(std::move(document_info));
+        }
+
+        return result;
+    } catch (const std::ios_base::failure& ex) {
+        LOG_WARNING() << "Meta file read error: " << ex.what();
+        throw exceptions::FilesystemException();
     }
-    return result;
 }
 
 models::DocumentPayloadPtr FileStorageSink::LoadPayload(const models::DocumentPosition& position) {
