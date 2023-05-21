@@ -1,13 +1,12 @@
 #pragma once
 
 #include <filesystem>
-#include <string>
+#include <optional>
 #include <unordered_map>
 
 #include <boost/noncopyable.hpp>
 
-#include <common/include/binary.hpp>
-
+#include <fs_sink/page.hpp>
 #include <models/document.hpp>
 
 
@@ -17,11 +16,6 @@ namespace documents::fs_sink {
 /// payloads to specific file structures.
 class FileStorageSink : private boost::noncopyable {
 public:
-    struct PageFile {
-        std::filesystem::path path;
-        size_t size;
-    };
-
     FileStorageSink(const std::filesystem::path& path);
     FileStorageSink(FileStorageSink&& other);
     ~FileStorageSink();
@@ -58,10 +52,6 @@ private:
 
     /// @brief inits FS files in the current directory
     void InitFs();
-
-    common::binary::BinaryOutStream WritePayload(
-        const models::DocumentPosition& position, bool is_new_page, size_t payload_size,
-        models::DocumentPayloadPtr payload_ptr);
 
     void Swap(FileStorageSink&& other);
     

@@ -10,6 +10,17 @@ def test_reload_from_fs_fetch(document_db: DocumentDbService, document_factory: 
     # create some documents
     payloads = [f'data{i}' for i in range(3)]
     docs = [document_factory.create(name=f'doc{i}', payload=payloads[i]) for i in range(3)]
+
+    # update some documents
+    docs[0]['name'] = 'new name'
+    payloads[0] = 'new payload'
+    update_data = {
+        'id': docs[0]['id'],
+        'name': docs[0]['name'],
+        'payload': payloads[0],
+    }
+    update_response = document_db.post('/api/v1/documents/update', body=update_data)
+    assert update_response.status_code == 200
     
     # reset and make sure that documents were reloaded from FS
     reset_response = document_db.reset()

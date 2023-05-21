@@ -36,7 +36,7 @@ public:
 
 class FilesystemException : public Exception {
 public:
-    FilesystemException(const std::string& msg) : Exception(msg) {}
+    FilesystemException(const std::string& msg = "Corrupted database files found") : Exception(msg) {}
 };
 
 } // namespace documents::exceptions

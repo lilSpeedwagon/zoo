@@ -16,6 +16,7 @@ set(SOURCES
     src/components/storage.cpp
     src/fs_sink/db_binary.cpp
     src/fs_sink/fs_sink.cpp
+    src/fs_sink/page.cpp
     src/handlers/clear.cpp
     src/handlers/create.cpp
     src/handlers/update.cpp
