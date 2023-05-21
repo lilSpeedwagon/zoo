@@ -1,9 +1,5 @@
 #include "fs_sink.hpp"
 
-#include <exception>
-#include <filesystem>
-#include <fstream>
-
 #include <boost/regex.hpp>
 
 #include <common/include/binary.hpp>
@@ -25,14 +21,12 @@ namespace {
 
 static const std::string kMetaFileName = "meta.ddb";
 static const std::string kMetaPrefix = "META";
-static const std::string kPagePrefix = "PAGE";
 static const boost::regex kPageFileRegex("^page_\\d+\\.dp$");
 static constexpr const size_t kMaxPageSize = 1024 * 1024 * 4; // 4Mb
 
 
 std::filesystem::path GetIndexPath(std::filesystem::path path) {
-    path += "/meta.ddb";
-    return path;
+    return path / kMetaFileName;
 }
 
 auto OpenMetaFileIn(const std::filesystem::path& path) {

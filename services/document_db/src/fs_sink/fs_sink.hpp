@@ -1,12 +1,10 @@
 #pragma once
 
 #include <filesystem>
-#include <string>
+#include <optional>
 #include <unordered_map>
 
 #include <boost/noncopyable.hpp>
-
-#include <common/include/binary.hpp>
 
 #include <fs_sink/page.hpp>
 #include <models/document.hpp>
