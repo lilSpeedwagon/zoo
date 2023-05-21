@@ -2,7 +2,7 @@ import pytest
 from typing import Any
 
 from utils.test_utils.fixtures import FactoryBase, ServiceBase
-from utils.test_utils.mocks import MockAny, DateTimeMock
+from utils.test_utils.mocks import MockAny
 
 
 class DocumentDbService(ServiceBase):
