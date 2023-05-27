@@ -1,4 +1,5 @@
 #include <chrono>
+#include <filesystem>
 #include <string>
 
 #include <catch2/catch.hpp>
@@ -38,6 +39,12 @@ TEST_CASE("ToString", "[Format]") {
     SECTION("String") {
         CheckString(ToString("hello"), "hello");
         CheckString(ToString(std::string("hello")), "hello");
+        CheckString(ToString(std::string_view("hello")), "hello");
+    }
+
+    SECTION("Path") {
+        CheckString(ToString(std::filesystem::path("/tmp/data/modoule.file")),
+                    "/tmp/data/modoule.file");
     }
 
     SECTION("Timepoint") {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <filesystem>
 #include <type_traits>
 #include <string>
 #include <sstream>
@@ -45,6 +46,11 @@ inline std::string ToString<std::string>(const std::string& value) {
 template<>
 inline std::string ToString<std::string_view>(const std::string_view& value) {
     return std::string(value);
+}
+
+template<>
+inline std::string ToString<std::filesystem::path>(const std::filesystem::path& path) {
+    return path.string();
 }
 
 template<>
