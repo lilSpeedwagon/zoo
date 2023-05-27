@@ -35,7 +35,7 @@ auto OpenMetaFileIn(const std::filesystem::path& path) {
     } catch (const std::ios_base::failure& ex) {
         throw exceptions::FilesystemException(common::format::Format(
             "Cannot open index file {}: {}",
-            path.string(), ex.what()));
+            path, ex.what()));
     }
 }
 
@@ -45,7 +45,7 @@ auto OpenMetaFileOut(const std::filesystem::path& path) {
     } catch (const std::ios_base::failure& ex) {
         throw exceptions::FilesystemException(common::format::Format(
             "Cannot open index file {}: {}",
-            path.string(), ex.what()));
+            path, ex.what()));
     }
 }
 
@@ -63,7 +63,7 @@ std::unordered_map<size_t, PageFile> LoadPageFilesMap(const std::filesystem::pat
         }
 
         PageFile page(item.path());
-        LOG_DEBUG() << "Found data page " << page.Path().string() << " of size " << page.Size();
+        LOG_DEBUG() << "Found data page " << page.Path() << " of size " << page.Size();
         files_map.insert({page.Index(), std::move(page)});
     }
     return files_map;
@@ -206,8 +206,7 @@ models::DocumentPayloadPtr FileStorageSink::LoadPayload(const models::DocumentPo
 }
 
 void FileStorageSink::InitFs() {
-    LOG_INFO() << "Init document DB file system storage at "
-               << meta_path_.generic_string();
+    LOG_INFO() << "Init document DB file system storage at " << meta_path_;
 
     const auto is_index_exists = std::filesystem::exists(meta_path_);
     if (!is_index_exists) {

@@ -24,7 +24,7 @@ size_t GetPageSize(const std::filesystem::path& path) {
         return std::filesystem::file_size(path);
     } catch (const std::filesystem::filesystem_error& ex) {
         LOG_ERROR() << common::format::Format(
-            "Cannot obtain page size for file {}: {}", path.string(), ex.what());
+            "Cannot obtain page size for file {}: {}", path, ex.what());
         throw exceptions::FilesystemException();
     }
 }
@@ -35,7 +35,7 @@ size_t GetPageIndex(const std::filesystem::path& path) {
         return std::stol(stem.substr(kPageFilePrefix.size()));
     } catch (const std::logic_error& ex) {
         LOG_ERROR() << common::format::Format(
-            "Cannot obtain page index for file {}: {}", path.string(), ex.what());
+            "Cannot obtain page index for file {}: {}", path, ex.what());
         throw exceptions::FilesystemException();
     }
 }
@@ -46,11 +46,11 @@ void CheckPageValidity(const std::filesystem::path& path) {
         std::string buffer;
         file >> buffer;
         if (buffer != kPagePrefix) {
-            LOG_ERROR() << path.string() << " file is corrupted; found prefix \"" << buffer << "\"";
+            LOG_ERROR() << path << " file is corrupted; found prefix \"" << buffer << "\"";
             throw exceptions::FilesystemException();
         }
     } catch(const std::ios_base::failure& ex) {
-        LOG_ERROR() << "I/O error on file " << path.string() << ": " << ex.what();
+        LOG_ERROR() << "I/O error on file " << path << ": " << ex.what();
         throw exceptions::FilesystemException();
     }
 }
@@ -88,7 +88,7 @@ void PageFile::Init() {
         CheckPageValidity(path_);
         size_ = GetPageSize(path_);
     } else {
-        LOG_DEBUG() << "Initializing new page at " << path_.string();
+        LOG_DEBUG() << "Initializing new page at " << path_;
         common::binary::BinaryOutStream stream(path_);
         stream << kPagePrefix;
         size_ = GetDefaultPageSize();
@@ -149,7 +149,7 @@ models::DocumentPayloadPtr PageFile::LoadPayload(size_t page_offset) {
     file >> is_active;
     if (!is_active) {
         LOG_ERROR() << "Document info points to an unactive payload: "
-                    << path_.string() << ":" << page_offset;
+                    << path_ << ":" << page_offset;
         throw exceptions::FilesystemException();
     }
     models::DocumentPayload payload;
