@@ -22,6 +22,7 @@ set(SOURCES
     src/logging/sink_fs.cpp
     src/format/format.cpp
     src/threading/thread_pool.cpp
+    src/transactions/transactions.cpp
     src/utils/errors.cpp
 )
 
@@ -56,6 +57,7 @@ set(TEST_SOURCES
     tests/log.cpp
     tests/main.cpp
     tests/strong_typedef.cpp
+    tests/transactions.cpp
     tests/utils.cpp
     ${SOURCES}
 )
