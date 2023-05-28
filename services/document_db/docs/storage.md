@@ -30,5 +30,5 @@ Payload is stored to files with append-only semantic. It helps avoid rewriting o
 ### Payload file structure
 
 ```
-| is_active (1 bit) | size (31 bit) | payload (\<size> bytes) | ... |
+| is_active (1 byte) | size (8 byte) | payload (<size> bytes) | ... |
 ```
