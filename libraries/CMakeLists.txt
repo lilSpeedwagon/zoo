@@ -4,4 +4,5 @@ project(libraries)
 
 add_subdirectory (./common)
 add_subdirectory (./components)
+add_subdirectory (./files)
 add_subdirectory (./http)

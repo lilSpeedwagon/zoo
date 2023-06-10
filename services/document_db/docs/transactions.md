@@ -15,7 +15,7 @@ The first version is more naive, but also more performant. It creates a copy of 
 1. Check if there is a copy `<filename>.new_version` file. If so - remove it.
 2. Make a copy of the writable file with the name `<filename>.new_version`.
 3. Make changes in the new file.
-4. Rename the copy to the original name (with replacement.
+4. Rename the copy to the original name (with replacement).
 
 ### Strict version
 
