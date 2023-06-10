@@ -17,6 +17,7 @@ Target web service is a simple CRUD API generator. As a service user I can defin
 - static configs :white_check_mark:
 - global components system :white_check_mark:
 - test system :white_check_mark:
+- transactions system :white_check_mark:
 - key-value database
 - deploy system
 - caches
