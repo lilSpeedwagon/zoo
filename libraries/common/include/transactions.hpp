@@ -29,19 +29,30 @@ public:
 
 /// @brief Scope guard for transactions. Begins transaction in ctor,
 /// and rollbacks it in dtor if IsCommited() returns false.
+template<typename TransactionT>
 class TransactionGuard : public boost::noncopyable {
 public:
-    TransactionGuard(std::shared_ptr<Transaction> transaction_ptr);
-    ~TransactionGuard();
+    template<typename ...Args>
+    TransactionGuard(Args... args) 
+        : transaction_ptr_(std::make_unique<TransactionT>(std::forward<Args>(args)...)) {
+        transaction_ptr_->Begin();
+    }
+    ~TransactionGuard() {
+        if (!transaction_ptr_->IsCommitted()) {
+            transaction_ptr_->Rollback();
+        }    
+    }
 
     /// @brief Commits the underlying transaction.
-    void Commit();
+    void Commit() {
+        transaction_ptr_->Commit();
+    }
 
 private:
-    TransactionGuard(TransactionGuard&&);
-    TransactionGuard& operator=(TransactionGuard&&);
+    TransactionGuard(TransactionGuard&&) {}
+    TransactionGuard& operator=(TransactionGuard&&) {}
 
-    std::shared_ptr<Transaction> transaction_ptr_;
+    std::unique_ptr<Transaction> transaction_ptr_;
 };
 
 } // namespace common::transactions

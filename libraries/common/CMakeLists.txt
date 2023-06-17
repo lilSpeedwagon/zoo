@@ -22,7 +22,6 @@ set(SOURCES
     src/logging/sink_fs.cpp
     src/format/format.cpp
     src/threading/thread_pool.cpp
-    src/transactions/transactions.cpp
     src/utils/errors.cpp
 )
 

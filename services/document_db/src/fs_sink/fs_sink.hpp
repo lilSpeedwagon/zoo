@@ -53,6 +53,11 @@ private:
     /// @brief inits FS files in the current directory
     void InitFs();
 
+    /// @brief Find position for a document of the specified size
+    /// @param size document size
+    /// @return available DocumentPosition
+    models::DocumentPosition FindAvailablePosition(size_t size);
+
     void Swap(FileStorageSink&& other);
     
     std::filesystem::path path_;

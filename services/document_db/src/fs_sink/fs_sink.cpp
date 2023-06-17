@@ -6,6 +6,8 @@
 #include <common/include/logging.hpp>
 #include <common/include/format.hpp>
 #include <common/include/utils/algo.hpp>
+#include <common/include/transactions.hpp>
+#include <files/include/transaction.hpp>
 
 #include <fs_sink/db_binary.hpp>
 #include <models/exceptions.hpp>
@@ -18,6 +20,9 @@ namespace documents::fs_sink {
 // provides information about the exact location of a specific DocumentPayload. 
 
 namespace {
+
+using TransactionGuard =
+    common::transactions::TransactionGuard<files::transaction::FileTransaction>;
 
 static const std::string kMetaFileName = "meta.ddb";
 static const std::string kMetaPrefix = "META";
@@ -69,19 +74,6 @@ std::unordered_map<size_t, PageFile> LoadPageFilesMap(const std::filesystem::pat
     return files_map;
 }
 
-std::optional<models::DocumentPosition> FindAvailablePosition(
-    const std::unordered_map<size_t, PageFile>& pages_map, size_t size) {
-    for (const auto& [index, page] : pages_map) {
-        if (page.Size() + size <= kMaxPageSize) {
-            return models::DocumentPosition{
-                index,        // page_index
-                page.Size(),  // page_offset
-            }; 
-        }
-    }
-    return std::nullopt;
-}
-
 } // namespace
 
 FileStorageSink::FileStorageSink(const std::filesystem::path& path) 
@@ -111,18 +103,14 @@ void FileStorageSink::Reset() {
 void FileStorageSink::Store(const models::DocumentInfoMap& documents_info) {
     LOG_DEBUG() << "Storing updated documents info to FS";
 
-    // TODO acquire FS mutex
-    // TODO start FS transaction
-
     auto stream = OpenMetaFileOut(meta_path_);
+    TransactionGuard guard(meta_path_);
     stream << kMetaPrefix;
     stream << documents_info.size();
     for (const auto& [_, info] : documents_info) {
         stream << *info;
     }
-
-    // TODO commit/rollback FS transaction
-    // TODO release FS mutex
+    guard.Commit();
 
     LOG_DEBUG() << "Storing completed";
 }
@@ -130,29 +118,27 @@ void FileStorageSink::Store(const models::DocumentInfoMap& documents_info) {
 models::DocumentPosition FileStorageSink::Store(const std::optional<models::DocumentPosition>& old_position_opt,
                                                 const models::DocumentPayloadPtr payload_ptr) {
     size_t actual_size = GetPayloadSize(payload_ptr);
-    std::optional<models::DocumentPosition> new_position_opt = FindAvailablePosition(pages_map_, actual_size);
-    if (!new_position_opt.has_value()) {
-        const auto new_index = ++page_index_counter_;
-        const auto new_offset = PageFile::GetDefaultPageSize();
-        new_position_opt = models::DocumentPosition{
-            new_index,   // page_index
-            new_offset,  // page_offset
-        };
-        LOG_DEBUG() << "No suitable page found, creating new with index " << new_index;
-    }
-
-    auto& new_position = new_position_opt.value();
+    models::DocumentPosition new_position = FindAvailablePosition(actual_size);
     std::optional<size_t> old_offset =
         old_position_opt.has_value() ? std::make_optional(old_position_opt.value().page_offset) : std::nullopt;
 
     PageFile page(path_, new_position.page_index);
-    page.StorePayload(payload_ptr, new_position.page_offset, old_offset);
-    pages_map_.insert_or_assign(page.Index(), page);
+    {
+        TransactionGuard page_guard(page.Path());
+        page.StorePayload(payload_ptr, new_position.page_offset, old_offset);
+        pages_map_.insert_or_assign(page.Index(), page);
 
-    // disable old payload if it was on another page
-    if (old_position_opt.has_value() && old_position_opt.value().page_index == new_position.page_index) {
-        PageFile old_page(path_, old_position_opt.value().page_index);
-        old_page.DisablePayload(old_position_opt.value().page_offset);
+        // disable old payload if it was on another page
+        if (old_position_opt.has_value() && old_position_opt.value().page_index != new_position.page_index) {
+            PageFile old_page(path_, old_position_opt.value().page_index);
+            {
+                TransactionGuard old_page_guard(old_page.Path());
+                old_page.DisablePayload(old_position_opt.value().page_offset);
+                old_page_guard.Commit();
+            }
+        }
+
+        page_guard.Commit();
     }
 
     LOG_DEBUG() << "Payload is stored to " << new_position.page_index << ":" << new_position.page_offset;    
@@ -161,7 +147,9 @@ models::DocumentPosition FileStorageSink::Store(const std::optional<models::Docu
 
 void FileStorageSink::Delete(const models::DocumentPosition& position) {
     PageFile page(path_, position.page_index);
+    TransactionGuard page_guard(page.Path());
     page.DisablePayload(position.page_offset);
+    page_guard.Commit();
 }
 
 models::DocumentInfoMap FileStorageSink::LoadMeta() {
@@ -219,6 +207,25 @@ void FileStorageSink::InitFs() {
             page_index_counter_ = index;
         }
     }
+}
+
+models::DocumentPosition FileStorageSink::FindAvailablePosition(size_t size) {
+    for (const auto& [index, page] : pages_map_) {
+        if (page.Size() + size <= kMaxPageSize) {
+            return models::DocumentPosition{
+                index,        // page_index
+                page.Size(),  // page_offset
+            }; 
+        }
+    }
+
+    const auto new_index = ++page_index_counter_;
+    const auto new_offset = PageFile::GetDefaultPageSize();
+    LOG_DEBUG() << "No suitable page found, creating new with index " << new_index;
+    return models::DocumentPosition{
+        new_index,   // page_index
+        new_offset,  // page_offset
+    };
 }
 
 void FileStorageSink::Swap(FileStorageSink&& other) {
