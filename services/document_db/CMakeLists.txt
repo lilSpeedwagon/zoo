@@ -42,8 +42,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # link libs
 target_link_libraries(${PROJECT_NAME}
     lib_common
-    lib_http
     lib_components
+    lib_files
+    lib_http
     Boost::thread
     Boost::regex
 )
