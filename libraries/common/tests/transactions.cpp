@@ -18,69 +18,71 @@ enum class TransactionState {
 
 class CustomTransaction : public common::transactions::Transaction {
 public:
-    CustomTransaction() : state_(TransactionState::Unknown) {}
+    CustomTransaction() {
+        state = TransactionState::Unknown;
+    }
     virtual ~CustomTransaction() = default;
 
     virtual void Begin() {
-        state_ = TransactionState::Started;
+        state = TransactionState::Started;
     }
 
     virtual void Commit() {
-        state_ = TransactionState::Commited;
+        state = TransactionState::Commited;
     }
 
     virtual void Rollback() {
-        state_ = TransactionState::RolledBack;
+        state = TransactionState::RolledBack;
     }
 
     virtual bool IsCommitted() const {
-        return state_ == TransactionState::Commited;
+        return state == TransactionState::Commited;
     }
 
-    TransactionState State() const {
-        return state_;
+    // static method exposing internal state for test purposes
+    static TransactionState State() {
+        return state;
     }
 
 private:
-    TransactionState state_;
+    static TransactionState state;
 };
+
+// definition of static member
+TransactionState CustomTransaction::state = TransactionState::Unknown;
+
+using TransactionGuard = common::transactions::TransactionGuard<CustomTransaction>;
 
 } // namespace
 
 TEST_CASE("GuardCommit", "[Transactions]") {
-    auto transaction = std::make_shared<CustomTransaction>();
-
     {
-        common::transactions::TransactionGuard guard(transaction);
-        CHECK(transaction->State() == TransactionState::Started);
+        TransactionGuard guard;
+        CHECK(CustomTransaction::State() == TransactionState::Started);
         guard.Commit();
-        CHECK(transaction->State() == TransactionState::Commited);
+        CHECK(CustomTransaction::State() == TransactionState::Commited);
     }
 
-    CHECK(transaction->State() == TransactionState::Commited);
+    CHECK(CustomTransaction::State() == TransactionState::Commited);
 }
 
 TEST_CASE("GuardNoCommit", "[Transactions]") {
-    auto transaction = std::make_shared<CustomTransaction>();
-
     {
-        common::transactions::TransactionGuard guard(transaction);
-        CHECK(transaction->State() == TransactionState::Started);
+        TransactionGuard guard;
+        CHECK(CustomTransaction::State() == TransactionState::Started);
     }
 
-    CHECK(transaction->State() == TransactionState::RolledBack);
+    CHECK(CustomTransaction::State() == TransactionState::RolledBack);
 }
 
 TEST_CASE("GuardRollbackOnException", "[Transactions]") {
-    auto transaction = std::make_shared<CustomTransaction>();
-
     try {
-        common::transactions::TransactionGuard guard(transaction);
-        CHECK(transaction->State() == TransactionState::Started);
+        TransactionGuard guard;
+        CHECK(CustomTransaction::State() == TransactionState::Started);
         throw std::exception();
     } catch (const std::exception& err) {}
 
-    CHECK(transaction->State() == TransactionState::RolledBack);
+    CHECK(CustomTransaction::State() == TransactionState::RolledBack);
 }
 
 } // namespace common::tests::transactions
