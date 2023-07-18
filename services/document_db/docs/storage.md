@@ -30,5 +30,13 @@ Payload is stored to files with append-only semantic. It helps avoid rewriting o
 ### Payload file structure
 
 ```
-| is_active (1 byte) | size (8 byte) | payload (<size> bytes) | ... |
+| page_prefix(12 bytes) | active_count (8 bytes) | is_active (1 byte) | size (8 byte) | payload (<size> bytes) | ... |
+ <------------------one per page----------------> <---------------------per every payload--------------------->
 ```
+
+Where:
+- `page_prefix` - prefix `"PAGE"` which is a string (8 bytes for str size + 4 bytes for the content)
+- `active_count` - number of active payload on this page
+- `is_active` - whether current payload is active or not
+- `size` - payload content size
+- `payload` - payload content
