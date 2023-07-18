@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <optional>
 
+#include <common/include/binary.hpp>
+
 #include <models/document.hpp>
 
 
@@ -53,9 +55,12 @@ public:
 
 private:
     void Init();
+    void DisablePayload(common::binary::BinaryOutStream& file, size_t offset);
+    void Delete();
 
     std::filesystem::path path_;
     size_t size_;
+    size_t payloads_count_;
     size_t index_;
 };
 
