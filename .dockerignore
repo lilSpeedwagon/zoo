@@ -15,9 +15,10 @@ build
 # tmp files
 *.log
 
-# python files
-*__pycache__
-
+# python cache files
+**/__pycache__
+**/.pytest_cache
+**/*.pyc
 
 # utils and scripts
 utils
@@ -25,7 +26,5 @@ requirements.txt
 *.sh
 
 # tests
-services/api_config/tests
-services/document_db/tests
-services/dummy/tests
+services/**/tests
 *conftest.py

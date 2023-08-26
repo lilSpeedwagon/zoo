@@ -42,7 +42,6 @@ class DocumentFactory(FactoryBase):
         return document
 
 
-
 @pytest.fixture
 def document_db():
     service = DocumentDbService()     
@@ -53,4 +52,3 @@ def document_db():
 @pytest.fixture
 def document_factory(document_db):
     return DocumentFactory(document_db)
-

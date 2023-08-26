@@ -123,6 +123,8 @@ void PageFile::StorePayload(models::DocumentPayloadPtr payload_ptr, size_t offse
         throw std::logic_error("");
     }
 
+    LOG_TRACE() << common::format::Format("Writing payload at {} at position {}", path_, offset);
+
     const bool is_active = true;
     common::binary::BinaryOutStream file(path_);
     file.Seek(offset);
@@ -143,6 +145,8 @@ void PageFile::DisablePayload(size_t offset) {
 }
 
 void PageFile::DisablePayload(common::binary::BinaryOutStream& file, size_t offset) {
+    LOG_TRACE() << common::format::Format("Disabling outdated payload at {} at position {}", path_, offset);
+
     payloads_count_--;
     file.Seek(kPagePrefixSize);
     file << payloads_count_;
@@ -158,6 +162,7 @@ void PageFile::DisablePayload(common::binary::BinaryOutStream& file, size_t offs
 }
 
 void PageFile::Delete() {
+    LOG_INFO() << "Removing page file at " << path_;
     std::filesystem::remove(path_);
     size_ = 0;
     payloads_count_ = 0;

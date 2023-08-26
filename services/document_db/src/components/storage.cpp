@@ -135,7 +135,7 @@ models::Document Storage::Delete(models::DocumentId id) {
         std::nullopt,                // payload
     };
     documents_info_.erase(info_it);
-    OnDocumentUpdated();
+    OnDocumentDeleted(info_it->second);
     return result;
 }
 
