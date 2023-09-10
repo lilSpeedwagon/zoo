@@ -1,9 +1,4 @@
-import os
-
 from services.document_db.tests.conftest import DocumentDbService, DocumentFactory
-
-
-DB_DIRECTORY = os.getcwd() + '/../../build/services/document_db/'
 
 
 def test_reload_from_fs_fetch(document_db: DocumentDbService, document_factory: DocumentFactory):
