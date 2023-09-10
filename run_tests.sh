@@ -28,5 +28,5 @@ if (test ${test_result} != 0)
 then
     docker logs ${container_id}
 fi
-docker stop ${container_id} &
+docker stop ${container_id}
 exit ${test_result}

@@ -58,6 +58,14 @@ private:
     /// @return available DocumentPosition
     models::DocumentPosition FindAvailablePosition(size_t size);
 
+
+    /// @brief Lookup for a page with the specified index. If page is missing and `create_if_missing`
+    /// is set to `true` then the page will be created. Otherwise `FileSystemException` exception will be thrown.
+    /// @param index page index
+    /// @param create_if_missing whether to create a page if missing
+    /// @return found or created page
+    PageFile FindPage(size_t index, bool create_if_missing = false);
+
     void Swap(FileStorageSink&& other);
     
     std::filesystem::path path_;

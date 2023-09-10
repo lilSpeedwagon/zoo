@@ -29,6 +29,8 @@
 
 # Python compiled
 *.pyc
+**/__pycache__
+**/.pytest_cache
 
 # Python packages
 *.egg

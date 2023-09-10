@@ -34,9 +34,9 @@ public:
             "Missing required argument \'{}\'", argument_name)) {}
 };
 
-class FilesystemException : public Exception {
+class FileSystemException : public Exception {
 public:
-    FilesystemException(const std::string& msg = "Corrupted database files found") : Exception(msg) {}
+    FileSystemException(const std::string& msg = "Corrupted database files found") : Exception(msg) {}
 };
 
 } // namespace documents::exceptions

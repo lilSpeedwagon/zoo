@@ -38,7 +38,7 @@ auto OpenMetaFileIn(const std::filesystem::path& path) {
     try {
         return common::binary::BinaryInStream(path);
     } catch (const std::ios_base::failure& ex) {
-        throw exceptions::FilesystemException(common::format::Format(
+        throw exceptions::FileSystemException(common::format::Format(
             "Cannot open index file {}: {}",
             path, ex.what()));
     }
@@ -48,7 +48,7 @@ auto OpenMetaFileOut(const std::filesystem::path& path) {
     try {
         return common::binary::BinaryOutStream(path, true);
     } catch (const std::ios_base::failure& ex) {
-        throw exceptions::FilesystemException(common::format::Format(
+        throw exceptions::FileSystemException(common::format::Format(
             "Cannot open index file {}: {}",
             path, ex.what()));
     }
@@ -122,15 +122,16 @@ models::DocumentPosition FileStorageSink::Store(const std::optional<models::Docu
     std::optional<size_t> old_offset =
         old_position_opt.has_value() ? std::make_optional(old_position_opt.value().page_offset) : std::nullopt;
 
-    PageFile page(path_, new_position.page_index);
+    auto page = FindPage(new_position.page_index, true);
     {
         TransactionGuard page_guard(page.Path());
         page.StorePayload(payload_ptr, new_position.page_offset, old_offset);
-        pages_map_.insert_or_assign(page.Index(), page);
+        auto index = page.Index();
+        pages_map_.insert_or_assign(index, std::move(page));
 
         // disable old payload if it was on another page
         if (old_position_opt.has_value() && old_position_opt.value().page_index != new_position.page_index) {
-            PageFile old_page(path_, old_position_opt.value().page_index);
+            auto old_page = FindPage(old_position_opt.value().page_index);
             {
                 TransactionGuard old_page_guard(old_page.Path());
                 old_page.DisablePayload(old_position_opt.value().page_offset);
@@ -167,7 +168,7 @@ models::DocumentInfoMap FileStorageSink::LoadMeta() {
 
         if (prefix != kMetaPrefix) {
             LOG_ERROR() << common::format::Format("Invalid meta data prefix: {}", prefix);
-            throw exceptions::FilesystemException();
+            throw exceptions::FileSystemException();
         }
 
         size_t count{};
@@ -184,7 +185,7 @@ models::DocumentInfoMap FileStorageSink::LoadMeta() {
         return result;
     } catch (const std::ios_base::failure& ex) {
         LOG_WARNING() << "Meta file read error: " << ex.what();
-        throw exceptions::FilesystemException();
+        throw exceptions::FileSystemException();
     }
 }
 
@@ -226,6 +227,19 @@ models::DocumentPosition FileStorageSink::FindAvailablePosition(size_t size) {
         new_index,   // page_index
         new_offset,  // page_offset
     };
+}
+
+PageFile FileStorageSink::FindPage(size_t index, bool create_if_missing) {
+    auto it = pages_map_.find(index);
+    if (it == pages_map_.end()) {
+        if (create_if_missing) {
+            it = pages_map_.emplace(index, PageFile(path_, index)).first;
+        } else {
+            LOG_ERROR() << "Missing page with index " << index;
+            throw exceptions::FileSystemException();
+        }
+    }
+    return it->second;
 }
 
 void FileStorageSink::Swap(FileStorageSink&& other) {
